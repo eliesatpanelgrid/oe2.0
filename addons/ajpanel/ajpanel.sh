@@ -40,7 +40,7 @@ $uninstall_command $package > /dev/null 2>&1
 fi
 echo "*******************************************"
 echo "*        Removal Completed Successfully   *"
-echo "*            Maintained by Eliesat          *"
+echo "*            Maintained by Eliesat        *"
 echo "*******************************************"
 sleep 3
 echo
