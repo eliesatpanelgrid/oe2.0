@@ -40,7 +40,7 @@ $uninstall_command $package > /dev/null 2>&1
 fi
 echo "*******************************************"
 echo "*        Removal Completed Successfully   *"
-echo "*            Provided by Eliesat          *"
+echo "*            Maintained by Eliesat          *"
 echo "*******************************************"
 sleep 3
 exit 1
@@ -51,8 +51,11 @@ check_and_remove_package
 
 #download & install package
 #########################################
+print_message() {
+echo "> [$(date +'%Y-%m-%d')] $1"
+}
 download_and_install_package() {
-echo "> Downloading $plugin-$version package  please wait ..."
+print_message "> Downloading $plugin-$version package  please wait ..."
 sleep 3
 wget --show-progress -qO $temp_dir/$targz_file --no-check-certificate $url
 tar -xzf $temp_dir/$targz_file -C / > /dev/null 2>&1
@@ -60,23 +63,18 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
-  echo "> $plugin-$version package installed successfully"
+  print_message "> $plugin-$version package installed successfully"
   sleep 3
-  exit 1
-else
-  echo "> $plugin-$version package download failed"
-  sleep 3
-fi  }
-download_and_install_package
-
-# Remove unnecessary files and folders
-#########################################
-print_message() {
-echo "> [$(date +'%Y-%m-%d')] $1"
-}
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
 rm -rf /control /postinst /preinst /prerm /postrm /tmp/*.ipk /tmp/*.tar.gz >/dev/null 2>&1
-print_message "> Uploaded By ElieSat"
 }
 cleanup
+print_message "> Maintained By ElieSatpanelgrid team"
+
+  exit 1
+else
+  print_message "> $plugin-$version package download failed"
+  sleep 3
+fi  }
+download_and_install_package
