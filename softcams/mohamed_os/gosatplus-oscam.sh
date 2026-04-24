@@ -65,4 +65,5 @@ trap cleanup EXIT
 check_and_install_package
 echo
 sleep 3
+exit 1
 
