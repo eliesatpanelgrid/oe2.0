@@ -62,6 +62,7 @@ rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 if [ $extract -eq 0 ]; then
   echo "> $plugin-$version package installed successfully"
   sleep 3
+  exit 1
 else
   echo "> $plugin-$version package download failed"
   sleep 3
