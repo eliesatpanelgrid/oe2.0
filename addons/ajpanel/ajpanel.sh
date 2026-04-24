@@ -43,6 +43,7 @@ echo "*        Removal Completed Successfully   *"
 echo "*            Maintained by Eliesat          *"
 echo "*******************************************"
 sleep 3
+echo
 exit 1
 else
 echo " " 
@@ -70,7 +71,7 @@ rm -rf /control /postinst /preinst /prerm /postrm /tmp/*.ipk /tmp/*.tar.gz >/dev
 }
 cleanup
 print_message "> Maintained By ElieSatpanelgrid team"
-
+echo
   exit 1
 else
   print_message "> $plugin-$version package download failed"
