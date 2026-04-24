@@ -72,6 +72,7 @@ rm -rf /control /postinst /preinst /prerm /postrm /tmp/*.ipk /tmp/*.tar.gz >/dev
 cleanup
 print_message "> Maintained By ElieSatpanelgrid team"
 echo
+sleep 3
   exit 1
 else
   print_message "> $plugin-$version package download failed"
