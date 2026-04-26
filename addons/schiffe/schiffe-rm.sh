@@ -3,7 +3,7 @@
 # Configuration
 #########################################
 plugin="schiffe"
-rm="Minesweeper"
+rm="Schiffe"
 
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"

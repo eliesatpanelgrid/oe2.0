@@ -4,7 +4,7 @@
 # Configuration
 #########################################
 plugin="schiffe"
-rm="Minesweeper"
+rm="Schiffe"
 section="addons"
 
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
