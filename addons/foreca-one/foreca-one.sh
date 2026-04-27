@@ -34,6 +34,19 @@ if [ -d $plugin_path ]; then
 echo "> removing package old version please wait..."
 sleep 3 
 rm -rf $plugin_path > /dev/null 2>&1
+rm -rf "/usr/lib/enigma2/python/Plugins/Extensions/vavoo"
+rm -f "/tmp/vavoo.log" > /dev/null 2>&1
+rm -f "/tmp/vavookey" > /dev/null 2>&1
+find /tmp -name "*.m3u" -exec rm -f {} \; > /dev/null 2>&1
+
+find /etc/enigma2 -name "*vavoo*" -exec rm -f {} \; > /dev/null 2>&1
+find /etc/enigma2 -name "*subbouquet.vavoo*" -exec rm -f {} \; > /dev/null 2>&1
+
+for bouquet_file in /etc/enigma2/bouquets.*; do
+sed -i '/vavoo/d' "$bouquet_file" > /dev/null 2>&1
+done
+
+wget -q -O - "http://127.0.0.1/web/servicelistreload?mode=0" > /dev/null 2>&1
 
 if grep -q "$package" "$status_file"; then
 echo "> Removing existing $package package, please wait..."
@@ -74,7 +87,6 @@ cleanup
 print_message "> Maintained By ElieSatpanelgrid team"
 echo
 sleep 3
-  exit 1
 else
   print_message "> $plugin-$version package download failed"
   sleep 3
