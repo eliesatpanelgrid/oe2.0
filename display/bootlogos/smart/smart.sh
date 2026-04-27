@@ -1,13 +1,11 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/display/bootlogos/smart/smart.sh
-
 
 # Configuration
 #########################################
 plugin="smart"
 rm="BootLogoSwapper"
 section="display"
-sub="bootlogos/smart"
+sub="bootlogos"
 
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$sub/$plugin"
 version=$(wget $git_url/version -qO- | awk 'NR==1')
@@ -16,6 +14,9 @@ package="enigma2-plugin-extensions-$plugin"
 targz_file="$plugin.tar.gz"
 url="$git_url/$targz_file"
 temp_dir="/tmp"
+
+echo $git_url
+echo $url
 
 # Determine package manager
 #########################################
@@ -76,7 +77,6 @@ cleanup
 print_message "> Maintained By ElieSatpanelgrid team"
 echo
 sleep 3
-  exit 1
 else
   print_message "> $plugin-$version package download failed"
   sleep 3
