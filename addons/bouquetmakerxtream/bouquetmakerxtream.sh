@@ -1,5 +1,4 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/bouquetmakerxtream/bouquetmakerxtream
 
 # Configuration
 #########################################
@@ -74,7 +73,6 @@ cleanup
 print_message "> Maintained By ElieSatpanelgrid team"
 echo
 sleep 3
-  exit 1
 else
   print_message "> $plugin-$version package download failed"
   sleep 3
