@@ -1,5 +1,5 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/aglareatv/aglareatv
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/aglareatv/aglareatv.sh
 
 # Configuration
 #########################################
@@ -106,7 +106,7 @@ is_installed() {
 
 # Install deps
 if [ -z "$DEPS" ]; then
-    exit 0
+    :
 else
 
 echo "Updating package lists..."
