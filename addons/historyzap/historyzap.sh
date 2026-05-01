@@ -167,7 +167,6 @@ if [ $? -eq 0 ];then
     path="/var/lib/$path/info/enigma2-plugin-extensions-historyzap.list"
     sed -i "/^\/tmp/d" $path > /dev/null 2>&1
     sed -i "/^$/d" $path > /dev/null 2>&1
-    exit 1
 fi
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
