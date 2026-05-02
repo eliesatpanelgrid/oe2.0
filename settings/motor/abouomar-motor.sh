@@ -1,5 +1,5 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/settings/motor/abouomar-motor.tar.gz
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/settings/motor/abouomar-motor.sh
 
 
 #configuration

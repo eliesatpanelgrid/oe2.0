@@ -1,5 +1,5 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/settings/motor/altahan-motor.tar.gz
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/settings/motor/altahan-motor.sh
 
 #configuration
 #######################################
