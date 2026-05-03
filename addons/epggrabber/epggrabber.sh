@@ -83,7 +83,7 @@ case "$PY" in
 esac
 
 # Required packages
-DEPS=""
+DEPS="python3-requests python3-six enigma2-plugin-extensions-epgimport"
 
 # Check if installed
 is_installed() {
