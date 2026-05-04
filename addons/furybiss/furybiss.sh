@@ -82,7 +82,7 @@ esac
 PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
 
 case "$PY" in
-    3.9|3.10|3.11|3.12|3.13|3.14) ;;
+    3.9|3.10|3.11|3.12|3.13|3.14|3.15) ;;
     *) echo "> Python $PY is not supported"; exit 1 ;;
 esac
 
