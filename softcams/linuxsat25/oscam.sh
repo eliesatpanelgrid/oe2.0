@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-pack="enigma2-plugin-softcams-oscam"
+pack="oscam"
 version="11.725-emu-r798"
 package="$pack"
 
