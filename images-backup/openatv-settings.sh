@@ -702,8 +702,6 @@ EOF
 device=$(head -n 1 /etc/hostname)
 echo "config.plugins.MyMetrixLiteOther.EHDtested="$device"_|_01" >> /tmp/file.txt
 
-echo "your device will reboot now please wait..."
-
 sync
 
 mv /tmp/file.txt /etc/enigma2/settings
@@ -711,5 +709,30 @@ mv /tmp/file.txt /etc/enigma2/settings
 sync
 
 sleep 5
+
+#!/bin/sh
+
+PACKAGE_URL="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/images-backup/openatv-settings-8.0.tar.gz"
+PACKAGE_FILE="/tmp/openatv-settings-8.0.tar.gz"
+
+# Remove old file if exists
+rm -f "$PACKAGE_FILE"
+
+wget -O "$PACKAGE_FILE" "$PACKAGE_URL"
+
+if [ $? -ne 0 ]; then
+    echo "Download failed!"
+    exit 1
+fi
+
+tar -xzf "$PACKAGE_FILE" -C /
+
+if [ $? -ne 0 ]; then
+    echo "Extraction failed!"
+    rm -f "$PACKAGE_FILE"
+    exit 1
+fi
+
+rm -f "$PACKAGE_FILE"
 
 
