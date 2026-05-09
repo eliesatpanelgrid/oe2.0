@@ -710,9 +710,6 @@ mv /tmp/file.txt /etc/enigma2/settings
 
 sync
 
-sleep 2
+sleep 5
 
-# stop enigma2 only (plugin will handle reboot)
-killall -9 enigma2
 
-sleep 2
