@@ -702,10 +702,17 @@ EOF
 device=$(head -n 1 /etc/hostname)
 echo "config.plugins.MyMetrixLiteOther.EHDtested="$device"_|_01" >> /tmp/file.txt
 
-sleep 3
 echo "your device will reboot now please wait..."
-init 4
-sleep 2
+
+sync
+
 mv /tmp/file.txt /etc/enigma2/settings
+
+sync
+
 sleep 2
 
+# stop enigma2 only (plugin will handle reboot)
+killall -9 enigma2
+
+sleep 2
