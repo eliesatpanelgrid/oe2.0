@@ -708,4 +708,4 @@ init 4
 sleep 2
 mv /tmp/file.txt /etc/enigma2/settings
 sleep 2
-reboot
+
