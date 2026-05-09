@@ -1,3 +1,197 @@
+#!/bin/sh
+
+# === Functions ===
+log() {
+  printf "%s\n" "$*"
+}
+
+log_action() {
+  printf "    • %-55s" "$1"
+}
+
+log_done() {
+  echo "[ ✔ ]"
+}
+
+log_skip() {
+  echo "[ skipped ]"
+}
+
+log_fail() {
+  echo "[ ✖ ]"
+}
+
+cleanup() {
+    rm -rf /tmp/*.ipk /tmp/*.tar.gz /var/cache/opkg/* /var/lib/opkg/lists/* /run/opkg.lock $i >/dev/null 2>&1
+}
+
+# === Determine the package manager and system type ===
+###########################################
+if command -v dpkg &> /dev/null; then
+    package_manager="apt"
+    status_file="/var/lib/dpkg/status"
+    install_command="dpkg -i --force-overwrite"
+    install_command1="dpkg -i --force-depends"
+    uninstall_command="apt-get purge --auto-remove -y"
+    ostype="Oe 2.5/2.6"
+    it=DreamOs
+    update="apt update"
+    upgrade="apt upgrade"
+else
+    package_manager="opkg"
+    install_command="opkg install"
+    install_command1="opkg install --force-depends"
+    uninstall_command="opkg remove --force-depends"
+    status_file="/var/lib/opkg/status"
+    ostype="Oe 2.0"
+    it=OpenSource
+    update="opkg update"
+    upgrade="opkg upgrade"
+fi
+
+###########################################
+# Web connectivity check (ip-api only)
+###########################################
+if wget -q --spider http://ip-api.com; then
+    WEB_OK=1
+else
+    WEB_OK=0
+fi
+
+###########################################
+# Date & Time
+###########################################
+DATE=$(date +%d-%m-%Y)
+TIME=$(date +%H:%M:%S)
+
+###########################################
+# Logging
+###########################################
+log() { printf "%s\n" "$*"; }
+
+###########################################
+# Cleanup (safe)
+###########################################
+cleanup() {
+    rm -f /tmp/*.ipk /tmp/*.tar.gz 2>/dev/null
+    rm -f /run/opkg.lock 2>/dev/null
+}
+
+###########################################
+# Detect package manager
+###########################################
+if command -v apt-get >/dev/null 2>&1; then
+    PM="apt"
+    INSTALL="apt-get install -y"
+    UPDATE="apt update"
+    OSTYPE="OE 2.5/2.6 (DreamOS)"
+else
+    PM="opkg"
+    INSTALL="opkg install"
+    UPDATE="opkg update"
+    OSTYPE="OE 2.0 (OpenSource)"
+fi
+
+###########################################
+# System info
+###########################################
+if [ -f /etc/image-version ]; then
+    IMAGE_NAME=$(grep -i "^creator=" /etc/image-version | cut -d"=" -f2 | xargs)
+    IMAGE_VERSION=$(grep -i "^version=" /etc/image-version | head -n1 | cut -d"=" -f2 | xargs)
+elif [ -f /etc/issue ]; then
+    IMAGE_NAME=$(head -n1 /etc/issue | awk '{print $1}')
+    IMAGE_VERSION=$(head -n1 /etc/issue | awk '{print $2}')
+else
+    IMAGE_NAME="Unknown"
+    IMAGE_VERSION="Unknown"
+fi
+
+BOX_MODEL=$(cat /etc/hostname 2>/dev/null)
+PYTHON_VERSION=$(python3 --version 2>/dev/null | awk '{print $2}')
+
+NET_IFACE=$(ip route | grep default | awk '{print $5}' | head -n1)
+[ -z "$NET_IFACE" ] && NET_IFACE="unknown"
+
+###########################################
+# Update repositories
+###########################################
+$UPDATE >/dev/null 2>&1
+
+###########################################
+# Ensure curl wget exists
+###########################################
+if ! command -v curl >/dev/null 2>&1; then
+    $INSTALL curl >/dev/null 2>&1
+fi
+
+if ! command -v wget >/dev/null 2>&1; then
+    $INSTALL wget >/dev/null 2>&1
+fi
+
+###########################################
+# GEOLOCATION (ONLY if WEB OK)
+###########################################
+if [ "$WEB_OK" -eq 1 ]; then
+
+IP=$(wget -qO- http://ip-api.com/line/?fields=query)
+
+GEO=$(wget -qO- "http://ip-api.com/json/$IP?fields=status,continent,country,regionName,city,timezone,currency")
+
+STATUS=$(echo "$GEO" | grep -o '"status":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+
+if [ "$STATUS" = "success" ]; then
+    CONTINENT=$(echo "$GEO" | grep -o '"continent":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+    COUNTRY=$(echo "$GEO" | grep -o '"country":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+    REGION=$(echo "$GEO" | grep -o '"regionName":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+    CITY=$(echo "$GEO" | grep -o '"city":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+    TZ=$(echo "$GEO" | grep -o '"timezone":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+    CURRENCY=$(echo "$GEO" | grep -o '"currency":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+fi
+
+fi
+
+###########################################
+# Display info (SYSTEM ONLY)
+###########################################
+log "✔ Box Model         : $BOX_MODEL"
+sleep 1
+
+log "✔ Image             : $IMAGE_NAME"
+sleep 1
+
+log "✔ Image Version     : $IMAGE_VERSION"
+sleep 1
+
+log "✔ Python            : $PYTHON_VERSION"
+sleep 1
+
+log "✔ Network Interface : $NET_IFACE"
+sleep 1
+
+LANG=$(grep config.osd.language /etc/enigma2/settings 2>/dev/null | cut -d'=' -f2 | cut -c1-2)
+[ -z "$LANG" ] && LANG="en"
+log "✔ Local Language    : $LANG"
+sleep 1
+
+###########################################
+# GEO DISPLAY ONLY IF WEB OK
+###########################################
+if [ "$WEB_OK" -eq 1 ]; then
+    log "✔ Continent         : $CONTINENT"
+    sleep 1
+    log "✔ Country           : $COUNTRY"
+    sleep 1
+    log "✔ Region            : $REGION"
+    sleep 1
+    log "✔ City              : $CITY"
+    sleep 1
+    log "✔ Timezone          : $TZ"
+    sleep 1
+    log "✔ Currency          : $CURRENCY"
+    sleep 1
+fi
+
+log ""
 
 sleep 3
 rm -rf /tmp/file.txt
