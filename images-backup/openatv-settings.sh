@@ -198,7 +198,7 @@ rm -rf /tmp/file.txt
 touch /tmp/file.txt
 
 cat <<EOF >> /tmp/file.txt
-config.ArabicSavior.fonts=/usr/lib/enigma2/python/Plugins/Extensions/ArabicSavior//fonts/Khalid-Art-bold.ttf
+config.ArabicSavior.fonts=/usr/lib/enigma2/python/Plugins/Extensions/ArabicSavior//fonts/SaberArnane-Subtitle.ttf
 config.autolanguage.audio_autoselect1=orj dos ory org esl qaa qaf und mis mul ORY ORJ Audio_ORJ oth
 config.autolanguage.audio_autoselect2=eng Englisch
 config.autolanguage.audio_epglanguage_alternative=eng Englisch
