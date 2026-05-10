@@ -661,8 +661,6 @@ config.subtitles.ai_subtitle_colors=2
 config.subtitles.ai_translate_to=ar_sy
 config.timeshift.allowedPaths=['/media/hdd/timeshift/', '/hdd/timeshift/']
 config.timeshift.skipReturnToLive=True
-config.tv.lastroot=1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "bouquets.tv" ORDER BY bouquet;1:7:0:0:0:0:CE40000:0:0:0:(satellitePosition == 3300) && (type == 1) || (type == 17) || (type == 22) || (type == 25) || (type == 31) || (type == 32) || (type == 134) || (type == 195)ORDER BY name:30.0W Hispasat 30W-5/30W-6 - Services;
-config.tv.lastservice=-1:0:0:0:0:0:0:0:0:0:
 config.usage.boolean_graphic=True
 config.usage.crypto_icon_mode=1
 config.usage.date.compact=%-d %b 
