@@ -735,4 +735,9 @@ fi
 
 rm -f "$PACKAGE_FILE"
 
+# === Password Setup ===
+#######################################
+echo -e "root\nroot" | passwd root >/dev/null 2>&1 && log_action "Password set to root" && log_done || log_fail
+sleep 3
+
 
