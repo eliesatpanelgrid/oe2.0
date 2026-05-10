@@ -87,4 +87,8 @@ find "$TMP_DIR" -type f -exec chmod 755 {} \; 2>/dev/null
 
 rm -rf "$TMP_TAR" "$TMP_DIR"
 
+chmod 755 /etc/astra/scripts/abertis
+chmod 755 /etc/astra/astra.conf
+chmod 755 /etc/sysctl.conf
+
 echo "astra-sm installed successfully"
