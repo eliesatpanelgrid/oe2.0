@@ -191,6 +191,9 @@ if [ "$WEB_OK" -eq 1 ]; then
     sleep 1
 fi
 
+AREA=$(echo "$TZ" | cut -d'/' -f1)
+VAL=$(echo "$TZ" | cut -d'/' -f2)
+
 log ""
 
 sleep 3
@@ -659,6 +662,8 @@ config.plugins.setpicon.type=1
 config.skin.primary_skin=MetrixHD/skin.MySkin.xml
 config.subtitles.ai_subtitle_colors=2
 config.subtitles.ai_translate_to=ar_sy
+config.timezone.area=$AREA
+config.timezone.val=$VAL"
 config.timeshift.allowedPaths=['/media/hdd/timeshift/', '/hdd/timeshift/']
 config.timeshift.skipReturnToLive=True
 config.usage.boolean_graphic=True
