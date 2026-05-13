@@ -477,6 +477,7 @@ config.plugins.chocholousekpicons.1.allowed=True
 config.plugins.chocholousekpicons.1.background=transparent
 config.plugins.chocholousekpicons.1.picon_folder=/media/hdd/picon
 config.plugins.epgsearch.numorbpos=0
+config.plugins.furybis.notifications=False
 config.plugins.imdb.showinplugins=True
 config.plugins.IPToSAT.enable=True
 config.plugins.IPToSAT.player=exteplayer3
