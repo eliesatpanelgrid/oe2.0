@@ -1,5 +1,5 @@
 #!/bin/sh
-
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/settings/tuner/tuner-1.2.sh
 
 tuner=tuner-1.2
 #Downloading tuner config file
