@@ -569,6 +569,7 @@ config.usage.swap_snr_on_osd=True
 config.usage.updownbutton_mode=0
 config.usage.use_force_overwrite=False
 config.usage.use_package_conffile=False
+config.usage.volume_instead_of_channelselection=True
 config.volumeControl.longStep=10
 config.volumeControl.pressStep=2
 config.volumeControl.volume=24
