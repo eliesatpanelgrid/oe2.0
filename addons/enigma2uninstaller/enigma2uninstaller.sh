@@ -1,9 +1,9 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/XXXXXX/XXXXXX.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/enigma2uninstaller/enigma2uninstaller.sh
 
 # Configuration
 #########################################
-plugin="XXXXXX"
+plugin="enigma2uninstaller"
 rm="Enigma2Uninstaller"
 section="addons"
 

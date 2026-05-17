@@ -2,7 +2,7 @@
 
 # Configuration
 #########################################
-plugin="XXXXXX"
+plugin="enigma2uninstaller"
 rm="Enigma2Uninstaller"
 
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
