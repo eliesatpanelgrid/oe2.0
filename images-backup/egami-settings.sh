@@ -607,12 +607,20 @@ if [ -d "/usr/lib/enigma2/python/Plugins/Extensions/OAWeather" ] || \
 
     # Rebuild oaweather_fav.dat
     python3 - <<EOF
+# -*- coding: utf-8 -*-
 import pickle
+import os
 
-data = [(u"${LOCATION}", ${LAT}, ${LON})]
+fav = "${FAV}"
 
-with open("${FAV}", "wb") as f:
+data = [(u"${LOCATION}", float("${LAT}"), float("${LON}"))]
+
+tmp = fav + ".tmp"
+
+with open(tmp, "wb") as f:
     pickle.dump(data, f, protocol=2)
+
+os.rename(tmp, fav)
 EOF
 
     sync
