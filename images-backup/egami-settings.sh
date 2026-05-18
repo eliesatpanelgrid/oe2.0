@@ -583,6 +583,46 @@ sync
 
 sleep 5
 
+SETTINGS="/etc/enigma2/settings"
+FAV="/etc/enigma2/oaweather_fav.dat"
+
+# OAWeather
+if [ -d "/usr/lib/enigma2/python/Plugins/Extensions/OAWeather" ] || \
+   [ -d "/usr/lib/enigma2/python/Plugins/SystemPlugins/OAWeather" ]; then
+
+    # Auto detect location
+    API_URL="http://ip-api.com/json"
+
+    DATA=$(wget -qO- "$API_URL")
+
+    CITY=$(echo "$DATA" | sed -n 's/.*"city":"\([^"]*\)".*/\1/p')
+    REGION=$(echo "$DATA" | sed -n 's/.*"regionName":"\([^"]*\)".*/\1/p')
+    COUNTRY=$(echo "$DATA" | sed -n 's/.*"country":"\([^"]*\)".*/\1/p')
+    LAT=$(echo "$DATA" | sed -n 's/.*"lat":\([^,]*\).*/\1/p')
+    LON=$(echo "$DATA" | sed -n 's/.*"lon":\([^,}]*\).*/\1/p')
+
+    LOCATION="${CITY}, ${REGION}, ${COUNTRY}"
+
+    NEWLINE="config.plugins.OAWeather.weatherlocation=('${LOCATION}', ${LAT}, ${LON})"
+
+    # Remove old weather line
+    sed -i '/^config\.plugins\.OAWeather\.weatherlocation=/d' "$SETTINGS"
+
+    # Add new weather line
+    echo "$NEWLINE" >> "$SETTINGS"
+
+    # Rebuild oaweather_fav.dat
+    python3 - <<EOF
+import pickle
+
+data = [(u"${LOCATION}", ${LAT}, ${LON})]
+
+with open("${FAV}", "wb") as f:
+    pickle.dump(data, f, protocol=2)
+EOF
+
+    sync
+
 # === Password Setup ===
 #######################################
 echo -e "root\nroot" | passwd root >/dev/null 2>&1 && log_action "Password set to root" && log_done || log_fail
