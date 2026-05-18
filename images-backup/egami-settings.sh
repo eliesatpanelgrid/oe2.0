@@ -607,6 +607,10 @@ EOF
 
 sync
 
+mv /tmp/file.txt /etc/enigma2/settings
+
+sync
+
 sleep 5
 
 # === Password Setup ===
