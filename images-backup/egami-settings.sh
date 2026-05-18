@@ -577,13 +577,7 @@ EOF
 
 sync
 
-mv /tmp/file.txt /etc/enigma2/settings
-
-sync
-
-sleep 5
-
-SETTINGS="/etc/enigma2/settings"
+SETTINGS="/tmp/file.txt"
 FAV="/etc/enigma2/oaweather_fav.dat"
 
 # OAWeather
@@ -622,6 +616,13 @@ with open("${FAV}", "wb") as f:
 EOF
 
     sync
+
+mv /tmp/file.txt /etc/enigma2/settings
+
+sync
+
+sleep 5
+
 
 # === Password Setup ===
 #######################################
