@@ -199,6 +199,27 @@ log ""
 sleep 3
 rm -rf /tmp/file.txt
 touch /tmp/file.txt
+SETTINGS="/tmp/file.txt"
+FAV="/etc/enigma2/oaweather_fav.dat"
+
+# Run only if OAWeather exists
+if [ -d "/usr/lib/enigma2/python/Plugins/Extensions/OAWeather" ] || \
+   [ -d "/usr/lib/enigma2/python/Plugins/SystemPlugins/OAWeather" ]; then
+
+    # Auto detect location
+    API_URL="http://ip-api.com/json"
+
+    DATA=$(wget -qO- "$API_URL")
+
+    CITY=$(echo "$DATA" | sed -n 's/.*"city":"\([^"]*\)".*/\1/p')
+    REGION=$(echo "$DATA" | sed -n 's/.*"regionName":"\([^"]*\)".*/\1/p')
+    COUNTRY=$(echo "$DATA" | sed -n 's/.*"country":"\([^"]*\)".*/\1/p')
+    LAT=$(echo "$DATA" | sed -n 's/.*"lat":\([^,]*\).*/\1/p')
+    LON=$(echo "$DATA" | sed -n 's/.*"lon":\([^,}]*\).*/\1/p')
+
+    LOCATION="${CITY}, ${REGION}, ${COUNTRY}"
+
+sed -i '/^config\.plugins\.OAWeather\.weatherlocation=/d' "$SETTINGS"
 
 cat <<EOF >> /tmp/file.txt
 config.ArabicSavior.fonts=/usr/lib/enigma2/python/Plugins/Extensions/ArabicSavior//fonts/SaberArnane-Subtitle.ttf
@@ -517,6 +538,7 @@ config.plugins.IPToSAT.player=exteplayer3
 config.plugins.KeyAdder.Autodownload_enabled=True
 config.plugins.KeyAdder.Autodownload_sitelink=MOHAMED_OS
 config.plugins.KeyAdder.wakeup=20:0
+config.plugins.OAWeather.weatherlocation=('${LOCATION}', ${LAT}, ${LON})
 config.plugins.PermanentClock.position_x=217
 config.plugins.PermanentClock.position_y=0
 config.plugins.serviceapp.servicemp3.player=exteplayer3
@@ -577,60 +599,23 @@ EOF
 
 sync
 
-SETTINGS="/tmp/file.txt"
-FAV="/etc/enigma2/oaweather_fav.dat"
-
-# OAWeather
-if [ -d "/usr/lib/enigma2/python/Plugins/Extensions/OAWeather" ] || \
-   [ -d "/usr/lib/enigma2/python/Plugins/SystemPlugins/OAWeather" ]; then
-
-    # Auto detect location
-    API_URL="http://ip-api.com/json"
-
-    DATA=$(wget -qO- "$API_URL")
-
-    CITY=$(echo "$DATA" | sed -n 's/.*"city":"\([^"]*\)".*/\1/p')
-    REGION=$(echo "$DATA" | sed -n 's/.*"regionName":"\([^"]*\)".*/\1/p')
-    COUNTRY=$(echo "$DATA" | sed -n 's/.*"country":"\([^"]*\)".*/\1/p')
-    LAT=$(echo "$DATA" | sed -n 's/.*"lat":\([^,]*\).*/\1/p')
-    LON=$(echo "$DATA" | sed -n 's/.*"lon":\([^,}]*\).*/\1/p')
-
-    LOCATION="${CITY}, ${REGION}, ${COUNTRY}"
-
-    NEWLINE="config.plugins.OAWeather.weatherlocation=('${LOCATION}', ${LAT}, ${LON})"
-
-    # Remove old weather line
-    sed -i '/^config\.plugins\.OAWeather\.weatherlocation=/d' "$SETTINGS"
-
-    # Add new weather line
-    echo "$NEWLINE" >> "$SETTINGS"
-
-    # Rebuild oaweather_fav.dat
-    python3 - <<EOF
-# -*- coding: utf-8 -*-
-import pickle
-import os
-
-fav = "${FAV}"
-
-data = [(u"${LOCATION}", float("${LAT}"), float("${LON}"))]
-
-tmp = fav + ".tmp"
-
-with open(tmp, "wb") as f:
-    pickle.dump(data, f, protocol=2)
-
-os.rename(tmp, fav)
-EOF
-
-    sync
-
 mv /tmp/file.txt /etc/enigma2/settings
 
 sync
 
-sleep 5
+# Rebuild oaweather_fav.dat
+    python3 - <<EOF
+import pickle
 
+data = [(u"${LOCATION}", ${LAT}, ${LON})]
+
+with open("${FAV}", "wb") as f:
+    pickle.dump(data, f, protocol=2)
+EOF
+
+sync
+
+sleep 5
 
 # === Password Setup ===
 #######################################
