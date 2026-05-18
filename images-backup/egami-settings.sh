@@ -202,10 +202,6 @@ touch /tmp/file.txt
 SETTINGS="/tmp/file.txt"
 FAV="/etc/enigma2/oaweather_fav.dat"
 
-# Run only if OAWeather exists
-if [ -d "/usr/lib/enigma2/python/Plugins/Extensions/OAWeather" ] || \
-   [ -d "/usr/lib/enigma2/python/Plugins/SystemPlugins/OAWeather" ]; then
-
     # Auto detect location
     API_URL="http://ip-api.com/json"
 
@@ -596,10 +592,6 @@ config.volumeControl.longStep=10
 config.volumeControl.pressStep=2
 config.volumeControl.volume=24
 EOF
-
-sync
-
-mv /tmp/file.txt /etc/enigma2/settings
 
 sync
 
