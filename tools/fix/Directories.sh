@@ -5,7 +5,8 @@ DEST="/usr/lib/enigma2/python/Tools"
 FILE="Directories.pyc"
 TMP="/tmp/$FILE"
 
-echo "Downloading $FILE..."
+echo "> Downloading and installing  $FILE please wait..."
+sleep 3
 
 if command -v wget >/dev/null 2>&1; then
     wget -q -O "$TMP" "$URL"
@@ -32,4 +33,6 @@ chmod 644 "$DEST/$FILE"
 
 sync
 
-echo "Done: $DEST/$FILE updated successfully."
+echo "> Done: $FILE updated successfully."
+echo "> Restart E2 to apply changes..."
+sleep 3
