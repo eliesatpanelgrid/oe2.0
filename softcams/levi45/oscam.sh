@@ -2,7 +2,7 @@
 
 # Configuration
 pack="enigma2-plugin-softcams-oscam-emu-levi45"
-version="11960-803_all"
+version="11961-803_all"
 package="$pack"
 
 #determine package manager
