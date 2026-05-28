@@ -1,5 +1,5 @@
 #!/bin/sh
-# https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/myhybridiptv/myhybridiptv.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/myhybridiptv/myhybridiptv.sh
 
 #########################################
 # Detect Python
@@ -127,31 +127,42 @@ is_installed() {
 #########################################
 # Install dependencies
 #########################################
+# Required packages
+DEPS="python3-core"
+
+# Check if installed
+is_installed() {
+    if [ "$OS" = "DreamOS" ]; then
+        dpkg -s "$1" >/dev/null 2>&1
+    else
+        opkg list-installed | grep -wq "$1"
+    fi
+}
+
+# Install deps
 if [ -z "$DEPS" ]; then
     :
 else
 
-    echo "Updating package lists..."
-    $PM_UPDATE >/dev/null 2>&1
-    echo ""
+echo "Updating package lists..."
+$PM_UPDATE >/dev/null 2>&1
+echo ""
 
-    for pkg in $DEPS; do
-
-        if is_installed "$pkg"; then
-            echo "[OK] $pkg already installed"
+for pkg in $DEPS; do
+    if is_installed "$pkg"; then
+        echo "[OK] $pkg already installed"
+    else
+        echo "[INSTALL] $pkg"
+        if $PM_INSTALL $pkg >/dev/null 2>&1; then
+            echo "[DONE] $pkg"
         else
-            echo "[INSTALL] $pkg"
-
-            if $PM_INSTALL "$pkg" >/dev/null 2>&1; then
-                echo "[DONE] $pkg"
-            else
-                echo "[FAIL] $pkg"
-            fi
+            echo "[FAIL] $pkg"
         fi
-
-    done
+    fi
+done
 
 fi
+
 
 #########################################
 # Print messages
