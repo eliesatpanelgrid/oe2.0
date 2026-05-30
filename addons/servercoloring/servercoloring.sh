@@ -1,9 +1,9 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/furybiss/furybiss.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/servercoloring/servercoloring.sh
 
 # Configuration
 #########################################
-plugin="furybiss"
+plugin="servercoloring"
 rm="ServerColoring"
 section="addons"
 
