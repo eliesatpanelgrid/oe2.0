@@ -88,7 +88,7 @@ case "$PY" in
 esac
 
 # Required packages
-DEPS=""
+DEPS="enigma2-plugin-extensions-bitrate, python3-pillow"
 
 # Check if installed
 is_installed() {
