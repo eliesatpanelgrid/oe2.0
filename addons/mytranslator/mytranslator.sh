@@ -8,7 +8,7 @@ PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}
 
 case "$PY" in
     3.13|3.14)
-        plugin1="myhybridiptv_py$PY"
+        plugin1="mytranslator_py$PY"
         ;;
     *)
         echo "> Python $PY is not supported"
