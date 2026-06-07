@@ -12,7 +12,7 @@ version=$(wget $git_url/version -qO- | awk 'NR==1')
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"
 targz_file="$plugin.tar.gz"
-url="$git_url/$targz_file"
+url="https://github.com/eliesatpanelgrid/oe2.0/releases/download/simplysports/simplysports.tar.gz"
 temp_dir="/tmp"
 
 # Determine package manager
