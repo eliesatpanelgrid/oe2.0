@@ -30,41 +30,25 @@ fi
 #check and_remove package old version
 #########################################
 check_and_remove_package() {
-    if [ -d "$plugin_path" ]; then
-        echo "> removing package old version please wait..."
-        sleep 3
+if [ -d $plugin_path ]; then
+echo "> removing package old version please wait..."
+sleep 3 
+rm -rf $plugin_path > /dev/null 2>&1
 
-        rm -rf "$plugin_path" > /dev/null 2>&1
-
-        [ -f "/tmp/vavoo.log" ] && rm -f "/tmp/vavoo.log" > /dev/null 2>&1
-        [ -f "/tmp/vavookey" ] && rm -f "/tmp/vavookey" > /dev/null 2>&1
-
-        find /tmp -name "*.m3u" -exec rm -f {} \; > /dev/null 2>&1
-        find /etc/enigma2 -name "*vavoo*" -exec rm -f {} \; > /dev/null 2>&1
-        find /etc/enigma2 -name "*subbouquet.vavoo*" -exec rm -f {} \; > /dev/null 2>&1
-
-        for bouquet_file in /etc/enigma2/bouquets.*; do
-            [ -f "$bouquet_file" ] && sed -i '/vavoo/d' "$bouquet_file" > /dev/null 2>&1
-        done
-
-        if [ -e "/usr/bin/enigma2" ]; then
-            wget -q -O - "http://127.0.0.1/web/servicelistreload?mode=0" > /dev/null 2>&1
-        fi
-
-        if grep -q "$package" "$status_file"; then
-            echo "> Removing existing $package package, please wait..."
-            $uninstall_command $package > /dev/null 2>&1
-        fi
-
-        echo "*******************************************"
-        echo "*        Removal Completed Successfully   *"
-        echo "*            Maintained by Eliesat        *"
-        echo "*******************************************"
-        sleep 3
-
-        exit 1
-    fi
-}
+if grep -q "$package" "$status_file"; then
+echo "> Removing existing $package package, please wait..."
+$uninstall_command $package > /dev/null 2>&1
+fi
+echo "*******************************************"
+echo "*        Removal Completed Successfully   *"
+echo "*            Maintained by Eliesat        *"
+echo "*******************************************"
+sleep 3
+echo
+exit 1
+else
+echo " " 
+fi  }
 check_and_remove_package
 
 #download & install dependencies
@@ -99,7 +83,13 @@ case "$PY" in
 esac
 
 # Required packages
-DEPS=""
+DEPS="wget
+python3-requests (or python-requests)
+python3-six (or python-six)
+ffmpeg
+gstplayer
+exteplayer3
+enigma2-plugin-systemplugins-serviceapp"
 
 # Check if installed
 is_installed() {
@@ -148,8 +138,6 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
-find /usr/lib/enigma2/python/Plugins/Extensions/vavoo -type f -exec chmod 644 {} \; > /dev/null 2>&1
-find /usr/lib/enigma2/python/Plugins/Extensions/vavoo -type d -exec chmod 755 {} \; > /dev/null 2>&1
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1

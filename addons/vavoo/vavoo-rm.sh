@@ -20,45 +20,38 @@ status_file="/var/lib/opkg/status"
 uninstall_command="opkg remove --force-depends"
 fi
 
-#check and_remove package old version
+# Remove package
 #########################################
-check_and_remove_package() {
-    if [ -d "$plugin_path" ]; then
-        echo "> removing package old version please wait..."
-        sleep 3
+remove_package() {
 
-        rm -rf "$plugin_path" > /dev/null 2>&1
+if [ -d "$plugin_path" ]; then
 
-        [ -f "/tmp/vavoo.log" ] && rm -f "/tmp/vavoo.log" > /dev/null 2>&1
-        [ -f "/tmp/vavookey" ] && rm -f "/tmp/vavookey" > /dev/null 2>&1
+echo "> removing package old version please wait..."
+sleep 3
 
-        find /tmp -name "*.m3u" -exec rm -f {} \; > /dev/null 2>&1
-        find /etc/enigma2 -name "*vavoo*" -exec rm -f {} \; > /dev/null 2>&1
-        find /etc/enigma2 -name "*subbouquet.vavoo*" -exec rm -f {} \; > /dev/null 2>&1
+rm -rf "$plugin_path" >/dev/null 2>&1
 
-        for bouquet_file in /etc/enigma2/bouquets.*; do
-            [ -f "$bouquet_file" ] && sed -i '/vavoo/d' "$bouquet_file" > /dev/null 2>&1
-        done
+if grep -q "$package" "$status_file" 2>/dev/null; then
+echo "> Removing existing $package package, please wait..."
+$uninstall_command "$package" >/dev/null 2>&1
+fi
 
-        if [ -e "/usr/bin/enigma2" ]; then
-            wget -q -O - "http://127.0.0.1/web/servicelistreload?mode=0" > /dev/null 2>&1
-        fi
+echo "*******************************************"
+echo "*        Removal Completed Successfully   *"
+echo "*            Provided by Eliesat          *"
+echo "*******************************************"
+sleep 3
 
-        if grep -q "$package" "$status_file"; then
-            echo "> Removing existing $package package, please wait..."
-            $uninstall_command $package > /dev/null 2>&1
-        fi
+else
 
-        echo "*******************************************"
-        echo "*        Removal Completed Successfully   *"
-        echo "*            Maintained by Eliesat        *"
-        echo "*******************************************"
-        sleep 3
+echo "> Plugin not found"
+sleep 2
 
-        exit 1
-    fi
+fi
+
 }
-check_and_remove_package
+
+remove_package
 
 # Cleanup
 #########################################
