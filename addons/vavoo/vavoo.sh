@@ -84,8 +84,8 @@ esac
 
 # Required packages
 DEPS="wget
-python3-requests (or python-requests)
-python3-six (or python-six)
+python3-requests
+python3-six
 ffmpeg
 gstplayer
 exteplayer3
