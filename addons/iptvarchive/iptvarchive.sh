@@ -133,6 +133,8 @@ rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
 
+
+
 PluginName="IPTVarchive"
 re='^[0-9]\+$'
 
@@ -141,25 +143,17 @@ check_ver() {
 }
 
 check_ver python
-if ! echo "$pyver" | grep -qE "$re"; then
-    check_ver python3
-fi
-
-if ! echo "$pyver" | grep -qE "$re"; then
-    exit 1
-fi
 
 path="/usr/lib/enigma2/python"
 destination="$path/Plugins/Extensions/$PluginName"
 link="$path/Components/Renderer/_RunningText.py"
 
-cp -a "/tmp/$pyver/." "$destination" >/dev/null 2>&1 || exit 1
+cp -a "/tmp/$pyver/." "$destination" >/dev/null 2>&1
 
 if [ ! -L "$link" ]; then
     ln -sf "$destination/_RunningText.py" "$link" >/dev/null 2>&1
 fi
 
-if [ $? -eq 0 ]; then
     find /tmp/ -name '[0-9]*' -type d -exec rm -rf {} + >/dev/null 2>&1
     find "$(pwd)/" /tmp/ -name "enigma2-plugin-extensions-${PluginName,,}_*" -type f -exec rm -f {} + >/dev/null 2>&1
 
@@ -175,11 +169,6 @@ if [ $? -eq 0 ]; then
         sed -i '/^\/tmp/d' "$listfile" >/dev/null 2>&1
         sed -i '/^$/d' "$listfile" >/dev/null 2>&1
     }
-
-    exit 0
-fi
-
-exit 1
 
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
