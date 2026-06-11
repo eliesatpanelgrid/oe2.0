@@ -2,7 +2,7 @@
 
 # Configuration
 pack="enigma2-plugin-softcams-ultracam-oscam"
-version="11959-emu-r802_all"
+version="11965-emu-r802_all"
 package="$pack"
 
 #determine package manager
