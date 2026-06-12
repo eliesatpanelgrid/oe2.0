@@ -1,5 +1,5 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/XXXXXX/XXXXXX.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/jihad-atv/jihad-atv.sh
 
 # Configuration
 #########################################
