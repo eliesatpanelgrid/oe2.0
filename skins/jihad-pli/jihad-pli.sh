@@ -12,7 +12,7 @@ version=$(wget $git_url/version -qO- | awk 'NR==1')
 plugin_path="/usr/share/enigma2/$rm"
 package="enigma2-plugin-extensions-$plugin"
 targz_file="$plugin.tar.gz"
-url="$https://github.com/eliesatpanelgrid/oe2.0/releases/download/Oldies/Jihad-pli.tar.gz"
+url="https://github.com/eliesatpanelgrid/oe2.0/releases/download/Oldies/Jihad-pli.tar.gz"
 temp_dir="/tmp"
 
 # Determine package manager
