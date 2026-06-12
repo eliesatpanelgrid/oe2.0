@@ -191,6 +191,65 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
+
+SKINDIR="/usr/share/enigma2/xDreamy"
+SETTINGS="/etc/enigma2/settings"
+
+OPBITRATE_SRC="$SKINDIR/bin/opbitrate"
+OPBITRATE_DEST="/usr/bin/opbitrate"
+
+# Install opbitrate
+if [ ! -x "$OPBITRATE_DEST" ] && [ -f "$OPBITRATE_SRC" ]; then
+    cp "$OPBITRATE_SRC" "$OPBITRATE_DEST"
+    chmod 755 "$OPBITRATE_DEST"
+fi
+
+# Detect image type
+IMAGE="default"
+
+file_image_version=$(tr '[:upper:]' '[:lower:]' < /etc/image-version 2>/dev/null)
+file_issue=$(tr '[:upper:]' '[:lower:]' < /etc/issue 2>/dev/null)
+
+for key in openatv egami pure2 openspa opendroid openbh openpli openvix openhdf nonsolosat satlodge gcc tnap hyperion teamblue; do
+    echo "$file_image_version$file_issue" | grep -q "$key" && {
+        IMAGE="$key"
+        break
+    }
+done
+
+if [ -f "$SKINDIR/image_logo/$IMAGE/imagelogo.png" ]; then
+    cp "$SKINDIR/image_logo/$IMAGE/imagelogo.png" "$SKINDIR/imagelogo.png"
+elif [ -f "/usr/share/enigma2/distro-logo.png" ]; then
+    cp "/usr/share/enigma2/distro-logo.png" "$SKINDIR/imagelogo.png"
+elif [ -f "$SKINDIR/image_logo/default/imagelogo.png" ]; then
+    cp "$SKINDIR/image_logo/default/imagelogo.png" "$SKINDIR/imagelogo.png"
+fi
+
+rm -rf "$SKINDIR/image_logo" 2>/dev/null
+
+# Detect box model
+BOX_MODEL=$(head -n 1 /etc/hostname 2>/dev/null | tr '[:upper:]' '[:lower:]')
+
+if [ -f "/usr/share/enigma2/$BOX_MODEL.png" ]; then
+    cp "/usr/share/enigma2/$BOX_MODEL.png" "$SKINDIR/boximage.png"
+fi
+
+# Install dependencies
+if [ -f "$SKINDIR/script/install-depends.sh" ]; then
+    chmod 755 "$SKINDIR/script/install-depends.sh"
+    "$SKINDIR/script/install-depends.sh" >/dev/null 2>&1
+fi
+
+# Apply skin
+if grep -q "^config.skin.primary_skin=" "$SETTINGS" 2>/dev/null; then
+    sed -i 's|^config.skin.primary_skin=.*|config.skin.primary_skin=xDreamy/skin.xml|' "$SETTINGS"
+else
+    echo "config.skin.primary_skin=xDreamy/skin.xml" >> "$SETTINGS"
+fi
+
+# OpenSPA fix
+sed -i 's|^config.misc.initialchannelselection=True|config.misc.initialchannelselection=False|' "$SETTINGS" 2>/dev/null
+
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
