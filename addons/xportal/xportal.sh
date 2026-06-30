@@ -105,14 +105,6 @@ else
 fi
 
 #########################################
-# Required packages
-#########################################
-DEPS="wget 
-python3-requests 
-python3-twisted enigma2-plugin-systemplugins-serviceapp
-exteplayer3"
-
-#########################################
 # Check installed package
 #########################################
 is_installed() {
@@ -129,7 +121,10 @@ is_installed() {
 # Install dependencies
 #########################################
 # Required packages
-DEPS="python3-core"
+DEPS="wget 
+python3-requests 
+python3-twisted enigma2-plugin-systemplugins-serviceapp
+exteplayer3"
 
 # Check if installed
 is_installed() {
