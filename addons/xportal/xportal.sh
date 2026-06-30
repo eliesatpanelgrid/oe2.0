@@ -190,11 +190,11 @@ download_and_install_package() {
 
     tar -xzf "$temp_dir/$targz_file" -C / >/dev/null 2>&1
     extract=$?
-
+    
     rm -rf "$temp_dir/$targz_file" >/dev/null 2>&1
 
     if [ $extract -eq 0 ]; then
-
+        mv /XPortal /usr/lib/enigma2/python/Plugins/Extensions/
         print_message "$plugin-$version package installed successfully"
 
         cleanup() {
