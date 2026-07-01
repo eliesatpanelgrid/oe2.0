@@ -128,7 +128,7 @@ is_installed() {
 # Install dependencies
 #########################################
 # Required packages
-DEPS="python3-core"
+DEPS=""
 
 # Check if installed
 is_installed() {
