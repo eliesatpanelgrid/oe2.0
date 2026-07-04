@@ -192,63 +192,94 @@ rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
 
-SKINDIR="/usr/share/enigma2/xDreamy"
-SETTINGS="/etc/enigma2/settings"
+SKINDIR='/usr/share/enigma2/xDreamy'
+SETTINGS='/etc/enigma2/settings'
+LOGFILE='/tmp/XDREAMY_Installation.log'
 
-OPBITRATE_SRC="$SKINDIR/bin/opbitrate"
-OPBITRATE_DEST="/usr/bin/opbitrate"
+# ==================== Logging Functions ====================
+echo "" > "$LOGFILE"
+log_title() { echo "$(date '+%H:%M:%S') - ==> $1" | tee -a "$LOGFILE"; }
+log_step()  { printf "    • %-50s" "$1" | tee -a "$LOGFILE"; }
+log_ok()    { echo "[✔]" | tee -a "$LOGFILE"; }
+log_skip()  { echo "[skipped]" | tee -a "$LOGFILE"; }
+log_fail()  { echo "[✖]" | tee -a "$LOGFILE"; }
 
-# Install opbitrate
-if [ ! -x "$OPBITRATE_DEST" ] && [ -f "$OPBITRATE_SRC" ]; then
-    cp "$OPBITRATE_SRC" "$OPBITRATE_DEST"
-    chmod 755 "$OPBITRATE_DEST"
-fi
+# ==================== Title ====================
+echo "===========================================================" | tee -a "$LOGFILE"
+echo "             ★ XDREAMY Installation Script ★" | tee -a "$LOGFILE"
+echo "===========================================================" | tee -a "$LOGFILE"
+echo "" | tee -a "$LOGFILE"
 
-# Detect image type
-IMAGE="default"
+# ==================== Image Logo Detection & Python Version ====================
+log_title "Detecting Image Type & Python Version"
 
-file_image_version=$(tr '[:upper:]' '[:lower:]' < /etc/image-version 2>/dev/null)
-file_issue=$(tr '[:upper:]' '[:lower:]' < /etc/issue 2>/dev/null)
+# Detect Image
+IMAGE="unknown"
+file_image_version=$(tr '[:upper:]' '[:lower:]' < /etc/image-version 2>/dev/null || true)
+file_issue=$(tr '[:upper:]' '[:lower:]' < /etc/issue 2>/dev/null || true)
 
 for key in openatv egami pure2 openspa opendroid openbh openpli openvix openhdf nonsolosat satlodge gcc tnap hyperion teamblue; do
-    echo "$file_image_version$file_issue" | grep -q "$key" && {
+    if echo "$file_image_version$file_issue" | grep -q "$key" 2>/dev/null; then
         IMAGE="$key"
         break
-    }
+    fi
 done
+log_step "Detected: $IMAGE"; log_ok
 
-if [ -f "$SKINDIR/image_logo/$IMAGE/imagelogo.png" ]; then
-    cp "$SKINDIR/image_logo/$IMAGE/imagelogo.png" "$SKINDIR/imagelogo.png"
-elif [ -f "/usr/share/enigma2/distro-logo.png" ]; then
-    cp "/usr/share/enigma2/distro-logo.png" "$SKINDIR/imagelogo.png"
-elif [ -f "$SKINDIR/image_logo/default/imagelogo.png" ]; then
-    cp "$SKINDIR/image_logo/default/imagelogo.png" "$SKINDIR/imagelogo.png"
+# Detect Python Version
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')" 2>/dev/null || echo "unknown")
+    log_step "Python: $PYTHON_VERSION"; log_ok
+else
+    log_step "Python: not found"; log_fail
 fi
 
-rm -rf "$SKINDIR/image_logo" 2>/dev/null
+# Apply Logo
+if [ -f "$SKINDIR/image_logo/$IMAGE/imagelogo.png" ]; then
+    cp "$SKINDIR/image_logo/$IMAGE/imagelogo.png" "$SKINDIR/imagelogo.png" 2>/dev/null || true
+    log_step "Applied logo for $IMAGE"; log_ok
+elif [ -f "/usr/share/enigma2/distro-logo.png" ]; then
+    cp "/usr/share/enigma2/distro-logo.png" "$SKINDIR/imagelogo.png" 2>/dev/null || true
+    log_step "Applied generic distro logo"; log_ok
+else
+    cp "$SKINDIR/image_logo/default/imagelogo.png" "$SKINDIR/imagelogo.png" 2>/dev/null || true
+    log_step "Applied default logo"; log_ok
+fi
 
-# Detect box model
-BOX_MODEL=$(head -n 1 /etc/hostname 2>/dev/null | tr '[:upper:]' '[:lower:]')
+# Remove extra files
+[ -d "$SKINDIR/image_logo" ] && rm -rf "$SKINDIR/image_logo" 2>/dev/null && { log_step "Removed extra files"; log_ok; } || true
+echo "" | tee -a "$LOGFILE"
+
+# ==================== Box Detection ====================
+log_title "Detecting Box Model"
+BOX_MODEL=$(head -n 1 /etc/hostname 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)
+log_step "Box Model: $BOX_MODEL"; log_ok
 
 if [ -f "/usr/share/enigma2/$BOX_MODEL.png" ]; then
-    cp "/usr/share/enigma2/$BOX_MODEL.png" "$SKINDIR/boximage.png"
-fi
-
-# Install dependencies
-if [ -f "$SKINDIR/script/install-depends.sh" ]; then
-    chmod 755 "$SKINDIR/script/install-depends.sh"
-    "$SKINDIR/script/install-depends.sh" >/dev/null 2>&1
-fi
-
-# Apply skin
-if grep -q "^config.skin.primary_skin=" "$SETTINGS" 2>/dev/null; then
-    sed -i 's|^config.skin.primary_skin=.*|config.skin.primary_skin=xDreamy/skin.xml|' "$SETTINGS"
+    cp "/usr/share/enigma2/$BOX_MODEL.png" "$SKINDIR/boximage.png" 2>/dev/null || true
+    log_step "Box Image: Applied Box logo"; log_ok
 else
-    echo "config.skin.primary_skin=xDreamy/skin.xml" >> "$SETTINGS"
+    log_step "Box Image: No logo found"; log_skip
+fi
+echo "" | tee -a "$LOGFILE"
+
+# ==================== Apply xDreamy Skin ====================
+log_title "Applying XDREAMY Skin"
+if grep -q "^config.skin.primary_skin=" "$SETTINGS" 2>/dev/null; then
+    sed -i "s|^config.skin.primary_skin=.*|config.skin.primary_skin=xDreamy/skin.xml|" "$SETTINGS" 2>/dev/null || true
+    log_step "Updated config.skin.primary_skin=xDreamy/skin.xml"; log_ok
+else
+    echo "config.skin.primary_skin=xDreamy/skin.xml" >> "$SETTINGS" 2>/dev/null || true
+    log_step "Appended skin setting for xDreamy"; log_ok
 fi
 
-# OpenSPA fix
-sed -i 's|^config.misc.initialchannelselection=True|config.misc.initialchannelselection=False|' "$SETTINGS" 2>/dev/null
+if grep -q "^config.misc.initialchannelselection=True" "$SETTINGS" 2>/dev/null; then
+    sed -i "s|^config.misc.initialchannelselection=True|config.misc.initialchannelselection=False|" "$SETTINGS" 2>/dev/null || true
+    log_step "Forced OpenSPA channel selection → False"; log_ok
+else
+    log_step "OpenSPA channel selection unchanged"; log_skip
+fi
+echo "" | tee -a "$LOGFILE"
 
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
