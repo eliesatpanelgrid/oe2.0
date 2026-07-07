@@ -8,7 +8,7 @@ PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}
 
 case "$PY" in
     3.13|3.14)
-        plugin1="buttonpatcher_py$PY"
+        plugin1="buttonpatcher_$PY"
         ;;
     *)
         echo "> Python $PY is not supported"
@@ -105,11 +105,6 @@ else
 fi
 
 #########################################
-# Required packages
-#########################################
-DEPS=""
-
-#########################################
 # Check installed package
 #########################################
 is_installed() {
@@ -126,7 +121,7 @@ is_installed() {
 # Install dependencies
 #########################################
 # Required packages
-DEPS="python3-core"
+DEPS=""
 
 # Check if installed
 is_installed() {
