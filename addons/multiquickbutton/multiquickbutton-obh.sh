@@ -7,24 +7,27 @@ plugin="multiquickbutton"
 rm="MultiQuickButton"
 section="addons"
 
-if [ -f /etc/issue ]; then
-    IMAGE_INFO=$(cat /etc/issue | tr '[:upper:]' '[:lower:]')
-elif [ -f /etc/image-version ]; then
-    IMAGE_INFO=$(cat /etc/image-version | tr '[:upper:]' '[:lower:]')
+if [ -f /etc/image-version ]; then
+    image=$(cat /etc/image-version | grep -iF "creator" | cut -d"=" -f2 | xargs)
+elif [ -f /etc/issue ]; then
+    image=$(cat /etc/issue | head -n1 | awk '{print $1;}')
 else
-    IMAGE_INFO=""
+    image=''
 fi
 
-if [[ "$IMAGE_INFO" == *"openblackhole"* || "$IMAGE_INFO" == *"obh"* ]]; then
-    plugin1="multiquickbutton-obh"
-    echo "Detected OpenBlackHole. Setting plugin to: $plugin"
+image_lower=$(echo "$image" | tr '[:upper:]' '[:lower:]')
 
-elif [[ "$IMAGE_INFO" == *"openvix"* || "$IMAGE_INFO" == *"vix"* ]]; then
+[[ ! -z "$image" ]] && echo "> Image detected: $image"
+sleep 1
+
+if [[ "$image_lower" == *"openbh"* || "$image_lower" == *"openblackhole"* || "$image_lower" == *"obh"* ]]; then
+    plugin1="multiquickbutton-obh"
+
+elif [[ "$image_lower" == *"openvix"* || "$image_lower" == *"vix"* ]]; then
     plugin1="multiquickbutton-ovix"
-    echo "Detected OpenViX. Setting plugin to: $plugin"
 
 else
-    echo "> Your images not supported"
+    echo "> Your image ($image) is not supported"
     exit 1
 fi
 
