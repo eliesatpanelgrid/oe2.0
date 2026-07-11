@@ -1,5 +1,5 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/multiquickbutton/multiquickbutton.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/multiquickbutton/multiquickbutton-obh.sh
 
 # Configuration
 #########################################
