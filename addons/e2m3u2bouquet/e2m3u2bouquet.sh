@@ -27,7 +27,7 @@ status_file="/var/lib/opkg/status"
 uninstall_command="opkg remove --force-depends"
 fi
 
-#check and_remove package old version
+# check and_remove package old version (Kept exactly as requested)
 #########################################
 check_and_remove_package() {
 if [ -d $plugin_path ]; then
@@ -66,8 +66,8 @@ echo "> Removing existing $package package, please wait..."
 $uninstall_command $package > /dev/null 2>&1
 fi
 echo "*******************************************"
-echo "*        Removal Completed Successfully   *"
-echo "*            Maintained by Eliesat        *"
+echo "* Removal Completed Successfully   *"
+echo "* Maintained by Eliesat        *"
 echo "*******************************************"
 sleep 3
 echo
@@ -77,13 +77,15 @@ echo " "
 fi  }
 check_and_remove_package
 
+# Config Processing (Fixed: Removed the hard exit 0)
+#########################################
 config_processing() {
     mkdir -p "$1/epgimport" "$1/override" >/dev/null 2>&1
     [ -d "$2/override" ] && mv -f "$2/override" "$1" >/dev/null 2>&1
     [ -f "$2/config.xml" ] && mv -n "$2/config.xml" "$1" >/dev/null 2>&1
     [ -f "$2/groups.db" ] && mv -n "$2/groups.db" "$1" >/dev/null 2>&1
     rm -r "$2" >/dev/null 2>&1
-    exit 0
+    # 'exit 0' removed here so script successfully moves forward to the download phase
 }
 
 mpoint=""
@@ -103,7 +105,7 @@ done
 [ -n "$mpoint" ] && backup="$mpoint/tmp" || mpoint="/etc/enigma2"
 config_processing "$mpoint/E2m3u2bouquet" "$backup/E2m3u2bouquet"
 
-#download & install dependencies
+# download & install dependencies
 #######################################
 # Detect OS
 if command -v apt-get >/dev/null 2>&1; then
@@ -170,7 +172,7 @@ done
 
 fi
 
-#download & install package
+# download & install package
 #########################################
 print_message() {
 echo "> [$(date +'%Y-%m-%d')] $1"
@@ -178,7 +180,7 @@ echo "> [$(date +'%Y-%m-%d')] $1"
 download_and_install_package() {
 print_message "> Downloading $plugin-$version package  please wait ..."
 sleep 3
-wget --show-progress -qO $temp_dir/$targz_file --no-check-certificate $url
+wget --show-progress -qO $temp_dir/$targz_file --no-check-certificate "$url"
 tar -xzf $temp_dir/$targz_file -C / > /dev/null 2>&1
 extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
@@ -210,14 +212,13 @@ if cp -a /tmp/"$pyver"/. "$destination" >/dev/null 2>&1; then
     list_path="/var/lib/$pkg_mgr/info/enigma2-plugin-extensions--${PluginName,,}.list"
     
     sed -i -e "/^\/tmp/d" -e "/^$/d" "$list_path" >/dev/null 2>&1
-    exit 0
 else
     exit 1
 fi
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
-rm -rf /control /postinst /preinst /prerm /postrm /tmp/*.ipk /tmp/*.tar.gz >/dev/null 2>&1
+rm -rf /control /postinst /preinst /prerm /postrm /tmp/*.ik /tmp/*.tar.gz >/dev/null 2>&1
 }
 cleanup
 print_message "> Maintained By ElieSatpanelgrid team"
