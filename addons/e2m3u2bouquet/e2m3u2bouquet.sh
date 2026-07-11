@@ -1,9 +1,9 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/XXXXXX/XXXXXX.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/e2m3u2bouquet/e2m3u2bouquet.sh
 
 # Configuration
 #########################################
-plugin="XXXXXX"
+plugin="e2m3u2bouquet"
 rm="E2m3u2bouquet"
 section="addons"
 
@@ -130,7 +130,7 @@ esac
 PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
 
 case "$PY" in
-    3.9|3.10|3.11|3.12|3.13|3.14) ;;
+    3.9|3.10|3.11|3.12|3.13) ;;
     *) echo "> Python $PY is not supported"; exit 1 ;;
 esac
 
