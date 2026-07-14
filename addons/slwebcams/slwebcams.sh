@@ -3,7 +3,7 @@
 
 # Configuration
 #########################################
-plugin="SLwebcams"
+plugin="slwebcams"
 rm="SLwebcams"
 section="addons"
 
