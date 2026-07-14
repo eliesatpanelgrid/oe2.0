@@ -3,7 +3,7 @@
 
 # Configuration
 #########################################
-plugin="CustomIPTVArchiveMakerPro"
+plugin="customiptvarchivemakerpro"
 rm="CustomIPTVArchiveMakerPro"
 section="addons"
 
