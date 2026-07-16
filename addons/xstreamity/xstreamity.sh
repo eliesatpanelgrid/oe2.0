@@ -74,11 +74,18 @@ case "$ARCH" in
     *) DEVICE="unknown" ;;
 esac
 
-# Detect python
-PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
+# Detect python (Ultra-short, native Python execution to avoid Telnet wrap & parsing bugs)
+if command -v python3 >/dev/null 2>&1; then
+    PY=$(python3 -c "import sys; print('%d.%d' % sys.version_info[:2])")
+else
+    PY=$(python -c "import sys; print('%d.%d' % sys.version_info[:2])")
+fi
+
+# Print the detected Python version
+echo "> Detected Python version: $PY"
 
 case "$PY" in
-    2.*|3.9|3.10|3.11|3.12|3.13|3.14) ;;
+    2.7|3.7|3.8|3.9|3.10|3.11|3.12|3.13|3.14) ;;
     *) echo "> Python $PY is not supported"; exit 1 ;;
 esac
 
