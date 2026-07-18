@@ -7,12 +7,15 @@ plugin="xtreamnew"
 rm="XtreamNew"
 section="addons"
 
+# Detect python
+PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
+
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
 
 version=$(wget $git_url/version -qO- | awk 'NR==1')
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"
-targz_file="$plugin.tar.gz"
+targz_file="$plugin_"$PY".tar.gz"
 url="$git_url/$targz_file"
 temp_dir="/tmp"
 
@@ -68,10 +71,7 @@ fi
 # Detect architecture
 ARCH=$(uname -m)
 case "$ARCH" in
-    aarch64) DEVICE="arm64" ;;
     armv7l|armhf) DEVICE="arm" ;;
-    mips|mipsel) DEVICE="mips" ;;
-    sh4) DEVICE="sh4" ;;
     *) DEVICE="unknown" ;;
 esac
 
@@ -79,7 +79,7 @@ esac
 PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
 
 case "$PY" in
-    3.9|3.10|3.11|3.12|3.13|3.14) ;;
+    3.13|3.14) ;;
     *) echo "> Python $PY is not supported"; exit 1 ;;
 esac
 
