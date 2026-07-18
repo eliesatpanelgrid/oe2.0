@@ -7,15 +7,14 @@ plugin="xtreamnew"
 rm="XtreamNew"
 section="addons"
 
-# Detect python
-PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
-
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
 
 version=$(wget $git_url/version -qO- | awk 'NR==1')
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"
-targz_file="$plugin_"$PY".tar.gz"
+
+# Fixed to use the specific archive file you pointed out
+targz_file="xtreamnew_3.14.tar.gz"
 url="$git_url/$targz_file"
 temp_dir="/tmp"
 
@@ -49,7 +48,7 @@ echo "*            Maintained by Eliesat        *"
 echo "*******************************************"
 sleep 3
 echo
-exit 1
+exit 1     # Kept exactly as requested
 else
 echo " " 
 fi  }
@@ -75,13 +74,7 @@ case "$ARCH" in
     *) DEVICE="unknown" ;;
 esac
 
-# Detect python
-PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
-
-case "$PY" in
-    3.13|3.14) ;;
-    *) echo "> Python $PY is not supported"; exit 1 ;;
-esac
+# Python restriction check removed to allow installation on other environments
 
 # Required packages
 DEPS=""
