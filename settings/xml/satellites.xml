@@ -1429,6 +1429,62 @@
 		<transponder frequency="12687000" symbol_rate="28800000" polarization="1" fec_inner="7" system="1" modulation="1" />
 		<transponder frequency="12723000" symbol_rate="27500000" polarization="0" fec_inner="3" system="0" modulation="1" />
 	</sat>
+   	<sat flags="1" name="Echonet" position="-5">
+		<transponder system="1" fec_inner="0" frequency="12120000" polarization="0" symbol_rate="31250000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12160000" polarization="0" symbol_rate="31250000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12200000" polarization="0" symbol_rate="31250000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12240000" polarization="0" symbol_rate="31250000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12280000" polarization="0" symbol_rate="31250000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12320000" polarization="0" symbol_rate="31250000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12360000" polarization="0" symbol_rate="31250000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12400000" polarization="0" symbol_rate="31250000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12440000" polarization="0" symbol_rate="31250000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12480000" polarization="0" symbol_rate="31250000" modulation="0" />
+	</sat>
+	<sat flags="1" name="digiteck" position="-4">
+		<transponder system="1" fec_inner="0" frequency="12100000" polarization="1" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12140000" polarization="1" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12180000" polarization="1" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12220000" polarization="1" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12260000" polarization="0" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12300000" polarization="1" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12340000" polarization="1" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12380000" polarization="1" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12420000" polarization="1" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12460000" polarization="1" symbol_rate="28175000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12500000" polarization="1" symbol_rate="28175000" modulation="0" />
+	</sat>
+	<sat flags="1" name="Citytv" position="-3">
+		<transponder system="1" fec_inner="0" frequency="11700000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11740000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11780000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11820000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11860000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11900000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11940000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11980000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12020000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12060000" polarization="1" symbol_rate="30000000" modulation="0" />
+	</sat>
+	<sat flags="1" name="Homesat" position="-2">
+		<transponder system="1" fec_inner="0" frequency="12540000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12580000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12620000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12660000" polarization="1" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12700000" polarization="1" symbol_rate="30000000" modulation="0" />
+	</sat>
+	<sat flags="1" name="Cablevision" position="-1">
+		<transponder system="1" fec_inner="0" frequency="11720000" polarization="0" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11760000" polarization="0" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11800000" polarization="0" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11840000" polarization="0" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11880000" polarization="0" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11920000" polarization="0" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="11960000" polarization="0" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12000000" polarization="0" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12040000" polarization="0" symbol_rate="30000000" modulation="0" />
+		<transponder system="1" fec_inner="0" frequency="12080000" polarization="0" symbol_rate="30000000" modulation="0" />
+	</sat>
 	<sat name="1.9E BulgariaSat 1" flags="1" position="19">
 		<transponder frequency="12073000" symbol_rate="30000000" polarization="0" fec_inner="2" system="1" modulation="2" />
 		<transponder frequency="12092000" symbol_rate="30000000" polarization="1" fec_inner="2" system="1" modulation="2" />
