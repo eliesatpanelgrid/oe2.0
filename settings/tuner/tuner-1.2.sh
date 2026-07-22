@@ -18,7 +18,11 @@ if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     grep "config.Nims.*" /tmp/$tuner >> /etc/enigma2/settings
     rm -rf /tmp/$tuner > /dev/null 2>&1
     
-    echo "> Restarting Enigma2..."
+    sleep 2
+echo
+echo "> "$motor" Channels Lists are installed successfully"
+echo "> Maintained By ElieSatpanelgrid team"
+echo
     systemctl start enigma2
 else
     sleep 2
