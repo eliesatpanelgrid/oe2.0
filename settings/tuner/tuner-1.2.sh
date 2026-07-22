@@ -10,7 +10,7 @@ echo "> Installing diseqc 1.2 tuner settings ..."
 # Check if systemd is available (DreamOS / Debian)
 if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     systemctl stop enigma2
-    sleep 2
+    sleep 1
     
     # Modify settings while Enigma2 is stopped
     sed -i '/config.Nims.0/d' /etc/enigma2/settings
@@ -23,18 +23,21 @@ if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     sleep 2
     systemctl start enigma2
 else
-    # Kill Enigma2 dirty to prevent memory overwrite
-    killall -9 enigma2
-    sleep 1
-    
+    # 1. Modify settings first
     sed -i '/config.Nims.0/d' /etc/enigma2/settings
     grep "config.Nims.*" /tmp/$tuner >> /etc/enigma2/settings
     rm -f /tmp/$tuner >/dev/null 2>&1
     
+    # 2. Display success messages
     echo "> $tuner Channels Lists are installed successfully"
     echo "> Maintained By ElieSatpanelgrid team"
     
+    # 3. Wait 2 seconds so you can read the output
     sleep 2
+    
+    # 4. Restart Enigma2 (init 4 -> init 3 forces clean reload without abrupt kill)
+    init 4
+    sleep 1
     init 3
 fi
 
