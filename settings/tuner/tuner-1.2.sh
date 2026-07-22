@@ -21,7 +21,11 @@ if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     echo "> Restarting Enigma2..."
     systemctl start enigma2
 else
-    echo "> Open-source image detected..."
+    sleep 2
+echo
+echo "> "$motor" Channels Lists are installed successfully"
+echo "> Maintained By ElieSatpanelgrid team"
+echo
     # Kill Enigma2 dirty to prevent memory overwrite
     killall -9 enigma2
     sleep 1
@@ -30,7 +34,11 @@ else
     grep "config.Nims.*" /tmp/$tuner >> /etc/enigma2/settings
     rm -rf /tmp/$tuner > /dev/null 2>&1
     
-    echo "> Restarting Enigma2..."
+    sleep 2
+echo
+echo "> "$motor" Channels Lists are installed successfully"
+echo "> Maintained By ElieSatpanelgrid team"
+echo
     init 3
 fi
 
