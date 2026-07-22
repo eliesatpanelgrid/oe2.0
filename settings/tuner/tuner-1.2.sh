@@ -7,6 +7,12 @@ wget -qO /tmp/$tuner "https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/m
 
 echo "> Installing diseqc 1.2 tuner settings ..."
 
+echo
+    echo "> $tuner is installed successfully"
+    echo "> Maintained By ElieSatpanelgrid team"
+    echo
+    sleep 2
+
 # Check if systemd is available (DreamOS / Debian)
 if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     # DreamOS / Systemd handling
