@@ -10,7 +10,7 @@ sleep 3
 rm -rf $file_path > /dev/null 2>&1
 fi
 
-wget --show-progress -qO $file_path https://gitlab.com/eliesat/picons/-/raw/main/satellites.xml
+wget --show-progress -qO $file_path https://github.com/eliesatpanelgrid/oe2.0/raw/main/settings/xml/satellites.xml
 
 echo
     echo "> satellite.xml file is installed successfully"
