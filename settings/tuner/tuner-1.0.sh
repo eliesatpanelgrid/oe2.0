@@ -9,7 +9,7 @@ wget -qO /tmp/$tuner "https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/m
 echo "> Installing diseqc 1.0 tuner settings ..."
 
 echo
-    echo "> $tuner Channels Lists are installed successfully"
+    echo "> $tuner is installed successfully"
     echo "> Maintained By ElieSatpanelgrid team"
     echo
     sleep 2

@@ -18,7 +18,7 @@ if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     rm -f /tmp/$tuner >/dev/null 2>&1
     
     echo
-    echo "> $tuner Channels Lists are installed successfully"
+    echo "> $tuner is installed successfully"
     echo "> Maintained By ElieSatpanelgrid team"
     echo
     sleep 2
@@ -37,7 +37,7 @@ else
     
     # 3. Print messages while GUI is down
     echo
-    echo "> $tuner Channels Lists are installed successfully"
+    echo "> $tuner is installed successfully"
     echo "> Maintained By ElieSatpanelgrid team"
     echo
     sleep 2
