@@ -76,25 +76,50 @@ case "$ARCH" in
     *)       DEVICE="unknown" ;;
 esac
 
-# Required packages
-DEPS="
-curl
-ffmpeg
-gstreamer1.0-plugins-bad-mpegtsmux
-python3-requests
-python3-beautifulsoup4
-python3-pillow
-python3-six
-python3-sqlite3
-python3-ujson
-"
+# Core system tools (same for PY2 and PY3)
+DEPS="curl ffmpeg gstreamer1.0-plugins-bad-mpegtsmux"
 
-# Enigma2 playback deps
-EXTRA_DEPS="
-enigma2-plugin-systemplugins-serviceapp
-exteplayer3
-alsa-utils-aplay
-"
+# Detect Python version and assign appropriate python packages
+if python --version 2>&1 | grep -q '^Python 3\.'; then
+    echo "Python 3 environment detected."
+    PY_DEPS="
+    python3-requests
+    python3-beautifulsoup4
+    python3-pillow
+    python3-six
+    python3-sqlite3
+    python3-ujson
+    python3-difflib
+    python3-threading
+    python3-json
+    python3-io
+    python3-email
+    python3-datetime
+    "
+else
+    echo "Python 2 environment detected."
+    PY_DEPS="
+    python-requests
+    python-beautifulsoup4
+    python-imaging
+    python-six
+    python-sqlite3
+    python-ujson
+    python-difflib
+    python-threading
+    python-json
+    python-io
+    python-email
+    python-datetime
+    "
+fi
+
+DEPS="$DEPS $PY_DEPS"
+
+# Enigma2 playback deps (Only for Opensource)
+if [ "$OS" != "DreamOS" ]; then
+    DEPS="$DEPS enigma2-plugin-systemplugins-serviceapp exteplayer3 alsa-utils-aplay"
+fi
 
 # DreamOS extra
 if [ "$OS" = "DreamOS" ] && [ "$DEVICE" = "arm64" ]; then
@@ -103,42 +128,35 @@ fi
 
 # Function to check if installed
 is_installed() {
-    grep -q "$1" "$STATUS"
+    grep -q "Package: $1$" "$STATUS" 2>/dev/null
 }
 
-echo "Updating package lists..."
-$PM_UPDATE >/dev/null 2>&1
-echo ""
+MISSING_PKGS=""
 
-# Install core deps
+# Check missing packages
 for pkg in $DEPS; do
     if is_installed "$pkg"; then
-        echo "[OK] $pkg already installed"
+        echo "[OK] $pkg"
     else
-        echo "[INSTALL] $pkg"
-        $PM_INSTALL $pkg
+        echo "[MISSING] $pkg"
+        MISSING_PKGS="$MISSING_PKGS $pkg"
     fi
 done
 
-echo ""
-
-# Install extra deps (only if needed)
-if [ "$OS" != "DreamOS" ]; then
-    for pkg in $EXTRA_DEPS; do
-        if is_installed "$pkg"; then
-            echo "[OK] $pkg already installed"
-        else
-            echo "[INSTALL] $pkg"
-            $PM_INSTALL $pkg
-        fi
-    done
+# Install all missing packages in ONE fast batch command
+if [ -n "$MISSING_PKGS" ]; then
+    echo ""
+    echo "Updating package lists..."
+    $PM_UPDATE >/dev/null 2>&1
+    
+    echo "Installing missing dependencies:$MISSING_PKGS"
+    $PM_INSTALL $MISSING_PKGS
 fi
 
-echo ""
-
-# Special fix for ujson on DreamOS if missing
-if [ "$OS" = "DreamOS" ] && ! is_installed "python3-ujson"; then
-    echo "[FIX] Installing python3-ujson manually..."
+# Special fix for ujson on DreamOS if missing from feed
+if [ "$OS" = "DreamOS" ] && ! is_installed "python3-ujson" && ! is_installed "python-ujson"; then
+    echo ""
+    echo "[FIX] Installing ujson manually..."
 
     cd /tmp || exit 1
 
@@ -149,14 +167,11 @@ if [ "$OS" = "DreamOS" ] && ! is_installed "python3-ujson"; then
         mips)
             wget -q https://raw.githubusercontent.com/fairbird/FootOnsat/main/Download/Pacakges/python/python-ujson_1.35-r0.0_mipsel.deb
             ;;
-        *)
-            echo "No prebuilt ujson for this arch, skipping"
-            ;;
     esac
 
     if ls *.deb >/dev/null 2>&1; then
-        dpkg -i --force-overwrite *.deb
-        apt-get install -f -y
+        dpkg -i --force-overwrite *.deb >/dev/null 2>&1
+        apt-get install -f -y >/dev/null 2>&1
         rm -f *.deb
     fi
 fi
