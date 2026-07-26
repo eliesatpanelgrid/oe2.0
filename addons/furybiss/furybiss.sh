@@ -35,52 +35,54 @@ esac
 PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
 
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
-version=$(wget $git_url/version -qO- | awk 'NR==1')
+version=$(wget $git_url/version -qO- | tr -d '\r' | awk 'NR==1')
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"
-ipk_file=""$plugin"_" $version"_" $ARCH".ipk"
-ipk_file=$(echo "$ipk_file" | tr -d ' ')
+
+# Clean string formatting for filename
+ipk_file="${plugin}_${version}_${ARCH}.ipk"
 url="$git_url/$ipk_file"
 temp_dir="/tmp"
 
-
 # Determine package manager
 #########################################
-if command -v dpkg &> /dev/null; then
-package_manager="apt"
-status_file="/var/lib/dpkg/status"
-uninstall_command="apt-get purge --auto-remove -y"
+if command -v dpkg > /dev/null 2>&1; then
+    package_manager="apt"
+    status_file="/var/lib/dpkg/status"
+    uninstall_command="apt-get purge --auto-remove -y"
 else
-package_manager="opkg"
-status_file="/var/lib/opkg/status"
-uninstall_command="opkg remove --force-depends"
+    package_manager="opkg"
+    status_file="/var/lib/opkg/status"
+    uninstall_command="opkg remove --force-depends"
 fi
 
-#check and_remove package old version
+# Check and remove old version package
 #########################################
 check_and_remove_package() {
-if [ -d $plugin_path ]; then
-echo "> removing package old version please wait..."
-sleep 3 
-rm -rf $plugin_path > /dev/null 2>&1
+    if [ -d "$plugin_path" ]; then
+        echo "> Removing old version, please wait..."
+        sleep 2
+        rm -rf "$plugin_path" > /dev/null 2>&1
 
-if grep -q "$package" "$status_file"; then
-echo "> Removing existing $package package, please wait..."
-$uninstall_command $package > /dev/null 2>&1
-fi
-echo "*******************************************"
-echo "*        Removal Completed Successfully   *"
-echo "*            Maintained by Eliesat        *"
-echo "*******************************************"
-sleep 3
-echo
-exit 1
-else
-echo " " 
-fi  }
+        if grep -q "$package" "$status_file" 2>/dev/null; then
+            echo "> Removing existing $package package, please wait..."
+            $uninstall_command "$package" > /dev/null 2>&1
+            if [ $? -ne 0 ]; then
+                echo "> Failed to remove old package."
+                exit 1
+            fi
+        fi
+        echo "*******************************************"
+        echo "*        Old Version Removed Successfully  *"
+        echo "*            Maintained by Eliesat        *"
+        echo "*******************************************"
+        sleep 2
+        echo
+    fi
+}
 check_and_remove_package
 
-#download & install dependencies
+# Download & install dependencies
 #######################################
 # Detect OS
 if command -v apt-get >/dev/null 2>&1; then
@@ -93,12 +95,6 @@ else
     PM_INSTALL="opkg install"
 fi
 
-# Detect architecture
-DEVICE="$ARCH"
-
-# Detect python
-PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
-
 case "$PY" in
     3.9|3.10|3.11|3.12|3.13|3.14|3.15) ;;
     *) echo "> Python $PY is not supported"; exit 1 ;;
@@ -107,7 +103,6 @@ esac
 # Required packages
 DEPS=""
 
-# Check if installed
 is_installed() {
     if [ "$OS" = "DreamOS" ]; then
         dpkg -s "$1" >/dev/null 2>&1
@@ -116,66 +111,61 @@ is_installed() {
     fi
 }
 
-# Install deps
-if [ -z "$DEPS" ]; then
-    :
-else
+if [ -n "$DEPS" ]; then
+    echo "Updating package lists..."
+    $PM_UPDATE >/dev/null 2>&1
+    echo ""
 
-echo "Updating package lists..."
-$PM_UPDATE >/dev/null 2>&1
-echo ""
-
-for pkg in $DEPS; do
-    if is_installed "$pkg"; then
-        echo "[OK] $pkg already installed"
-    else
-        echo "[INSTALL] $pkg"
-        if $PM_INSTALL $pkg >/dev/null 2>&1; then
-            echo "[DONE] $pkg"
+    for pkg in $DEPS; do
+        if is_installed "$pkg"; then
+            echo "[OK] $pkg already installed"
         else
-            echo "[FAIL] $pkg"
+            echo "[INSTALL] $pkg"
+            if $PM_INSTALL "$pkg" >/dev/null 2>&1; then
+                echo "[DONE] $pkg"
+            else
+                echo "[FAIL] $pkg"
+            fi
         fi
-    fi
-done
-
+    done
 fi
 
 print_message() {
     echo "> [$(date +'%Y-%m-%d')] $1"
 }
 
-#download & install package
+# Download & install package
 #########################################
 download_and_install_package() {
-    print_message "> Downloading $plugin-$version package  please wait ..."
-    sleep 3
+    print_message "Downloading $plugin-$version package, please wait..."
+    sleep 2
 
-    wget --no-check-certificate --show-progress -qO $temp_dir/$ipk_file $url
+    wget --no-check-certificate --show-progress -qO "$temp_dir/$ipk_file" "$url"
     dl_status=$?
 
     if [ $dl_status -ne 0 ] || [ ! -f "$temp_dir/$ipk_file" ]; then
-        print_message "> $plugin-$version package download failed"
+        print_message "$plugin-$version package download failed from $url"
         sleep 3
-        return 1
+        exit 1
     fi
 
     if command -v opkg >/dev/null 2>&1; then
         opkg update >/dev/null 2>&1
-        opkg install --force-reinstall $temp_dir/$ipk_file
+        opkg install --force-reinstall "$temp_dir/$ipk_file"
         install_status=$?
     elif command -v dpkg >/dev/null 2>&1; then
-        dpkg -i $temp_dir/$ipk_file
+        dpkg -i "$temp_dir/$ipk_file"
         install_status=$?
     else
-        print_message "> No supported package manager found"
-        return 1
+        print_message "No supported package manager found"
+        exit 1
     fi
 
-    rm -f $temp_dir/$ipk_file >/dev/null 2>&1
+    rm -f "$temp_dir/$ipk_file" >/dev/null 2>&1
 
     if [ $install_status -eq 0 ]; then
         echo
-        print_message "> $plugin-$version package installed successfully"
+        print_message "$plugin-$version package installed successfully"
 
         cleanup() {
             [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
@@ -183,12 +173,13 @@ download_and_install_package() {
         }
 
         cleanup
-        print_message "> Maintained By ElieSatpanelgrid team"
+        print_message "Maintained By ElieSatpanelgrid team"
         echo
-        sleep 3
+        sleep 2
     else
-        print_message "> $plugin-$version installation failed"
-        sleep 3
+        print_message "$plugin-$version installation failed"
+        exit 1
     fi
 }
+
 download_and_install_package
