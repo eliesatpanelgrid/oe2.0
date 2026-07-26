@@ -7,6 +7,30 @@ plugin="furybiss"
 rm="FuryBiss"
 section="addons"
 
+# Helper print error function
+print_error() {
+    echo "> ERROR: $1"
+}
+
+# Detect system architecture
+#########################################
+SYS_ARCH=$(uname -m)
+case $SYS_ARCH in
+    armv*|aarch32)
+        ARCH="arm"
+        ;;
+    aarch64)
+        ARCH="aarch64"
+        ;;
+    mips*)
+        ARCH="mipsel"
+        ;;
+    *)
+        print_error "Unsupported architecture ($SYS_ARCH) for this plugin."
+        exit 1
+        ;;
+esac
+
 # Detect python
 PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
 
@@ -14,7 +38,8 @@ git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/
 version=$(wget $git_url/version -qO- | awk 'NR==1')
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"
-ipk_file=""$plugin"_"$PY".ipk"
+ipk_file=""$plugin"_" $version"_" $ARCH".ipk"
+ipk_file=$(echo "$ipk_file" | tr -d ' ')
 url="$git_url/$ipk_file"
 temp_dir="/tmp"
 
@@ -69,22 +94,7 @@ else
 fi
 
 # Detect architecture
-ARCH=$(uname -m)
-case "$ARCH" in
-    aarch64) DEVICE="arm64" ;;
-    armv7l|armhf) DEVICE="arm" ;;
-    mips|mipsel) DEVICE="mips" ;;
-    sh4) DEVICE="sh4" ;;
-    *) DEVICE="unknown" ;;
-esac
-
-# Detect python
-PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
-
-case "$PY" in
-    3.9|3.10|3.11|3.12|3.13|3.14|3.15) ;;
-    *) echo "> Python $PY is not supported"; exit 1 ;;
-esac
+DEVICE="$ARCH"
 
 # Required packages
 DEPS=""
