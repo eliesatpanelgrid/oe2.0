@@ -80,6 +80,7 @@ check_and_remove_package() {
         echo "*        Old Version Removed Successfully  *"
         echo "*            Maintained by Eliesat        *"
         echo "*******************************************"
+        exit 1
         sleep 2
         echo
     fi
@@ -138,7 +139,7 @@ download_and_install_package() {
     sleep 2
 
     # Download with explicit SSL bypass and timeout limits to prevent hanging
-    wget --no-check-certificate --timeout=15 -qO "$temp_dir/$ipk_file" "$url"
+    wget --show-progress --no-check-certificate --timeout=15 -qO "$temp_dir/$ipk_file" "$url"
     dl_status=$?
 
     if [ $dl_status -ne 0 ] || [ ! -f "$temp_dir/$ipk_file" ] || [ ! -s "$temp_dir/$ipk_file" ]; then
