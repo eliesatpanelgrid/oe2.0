@@ -74,14 +74,6 @@ case "$ARCH" in
     *) DEVICE="unknown" ;;
 esac
 
-# Detect python
-PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
-
-case "$PY" in
-    3.9|3.10|3.11|3.12|3.13|3.14) ;;
-    *) echo "> Python $PY is not supported"; exit 1 ;;
-esac
-
 # Required packages
 DEPS="wget
 python3-requests
@@ -138,6 +130,11 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
+
+if [ -d "/usr/lib/enigma2/python/Plugins/Extensions/vavoo" ]; then
+    find /usr/lib/enigma2/python/Plugins/Extensions/vavoo -type f -exec chmod 644 {} + >/dev/null 2>&1
+    find /usr/lib/enigma2/python/Plugins/Extensions/vavoo -type d -exec chmod 755 {} + >/dev/null 2>&1
+fi
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
