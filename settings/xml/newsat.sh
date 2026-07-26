@@ -6,11 +6,11 @@ echo "> Downloading & Installing Satellites Frequencies File Please Wait..."
 sleep 2
 
 # Use curl if available (handles modern GitHub SSL better on Enigma2)
-if command -v curl >/dev/null 2>&1; then
-    curl -L -k -o "$file_path" "$url"
+if command -v wget >/dev/null 2>&1; then
+    wget --no-check-certificate -O "$file_path" "$url"
 else
     # Fallback to wget without quiet mode to reveal errors
-    wget --no-check-certificate -O "$file_path" "$url"
+    curl -L -k -o "$file_path" "$url"
 fi
 
 # Check if file actually downloaded and isn't empty
