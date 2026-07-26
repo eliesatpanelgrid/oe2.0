@@ -34,13 +34,18 @@ esac
 # Detect python
 PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
 
+case "$PY" in
+    3.9|3.10|3.11|3.12|3.13|3.14|3.15) ;;
+    *) print_error "Python $PY is not supported"; exit 1 ;;
+esac
+
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
 version=$(wget $git_url/version -qO- | tr -d '\r' | awk 'NR==1')
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"
 
-# Clean string formatting for filename
-ipk_file="${plugin}_${version}_${ARCH}.ipk"
+# IPK filename built using Python version ($PY) instead of plugin version
+ipk_file="${plugin}_${PY}_${ARCH}.ipk"
 url="$git_url/$ipk_file"
 temp_dir="/tmp"
 
@@ -84,7 +89,6 @@ check_and_remove_package
 
 # Download & install dependencies
 #######################################
-# Detect OS
 if command -v apt-get >/dev/null 2>&1; then
     OS="DreamOS"
     PM_UPDATE="apt-get update"
@@ -95,12 +99,6 @@ else
     PM_INSTALL="opkg install"
 fi
 
-case "$PY" in
-    3.9|3.10|3.11|3.12|3.13|3.14|3.15) ;;
-    *) echo "> Python $PY is not supported"; exit 1 ;;
-esac
-
-# Required packages
 DEPS=""
 
 is_installed() {
@@ -137,14 +135,14 @@ print_message() {
 # Download & install package
 #########################################
 download_and_install_package() {
-    print_message "Downloading $plugin-$version package, please wait..."
+    print_message "Downloading $ipk_file package, please wait..."
     sleep 2
 
     wget --no-check-certificate --show-progress -qO "$temp_dir/$ipk_file" "$url"
     dl_status=$?
 
     if [ $dl_status -ne 0 ] || [ ! -f "$temp_dir/$ipk_file" ]; then
-        print_message "$plugin-$version package download failed from $url"
+        print_message "Package download failed from $url"
         sleep 3
         exit 1
     fi
@@ -165,7 +163,7 @@ download_and_install_package() {
 
     if [ $install_status -eq 0 ]; then
         echo
-        print_message "$plugin-$version package installed successfully"
+        print_message "$plugin package installed successfully"
 
         cleanup() {
             [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
@@ -177,7 +175,7 @@ download_and_install_package() {
         echo
         sleep 2
     else
-        print_message "$plugin-$version installation failed"
+        print_message "$plugin installation failed"
         exit 1
     fi
 }
