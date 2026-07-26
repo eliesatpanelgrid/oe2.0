@@ -7,7 +7,7 @@ sleep 2
 
 # Use curl if available (handles modern GitHub SSL better on Enigma2)
 if command -v wget >/dev/null 2>&1; then
-    wget --no-check-certificate -O "$file_path" "$url"
+   wget --show-progress -qO --no-check-certificate "$file_path" "$url"
 else
     # Fallback to wget without quiet mode to reveal errors
     curl -L -k -o "$file_path" "$url"
