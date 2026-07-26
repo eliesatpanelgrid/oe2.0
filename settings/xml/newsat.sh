@@ -12,7 +12,7 @@ echo "> Downloading & Installing Satellites Frequencies File Please Wait..."
 sleep 2
 
 if command -v wget >/dev/null 2>&1; then
-   wget --show-progress -qO --no-check-certificate "$file_path" "$url"
+   wget --show-progress -O --no-check-certificate "$file_path" "$url"
 else
     curl -L -k -o "$file_path" "$url"
 fi
