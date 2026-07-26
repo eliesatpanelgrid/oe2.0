@@ -40,7 +40,6 @@ case "$PY" in
 esac
 
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
-version=$(wget --no-check-certificate $git_url/version -qO- 2>/dev/null | tr -d '\r' | awk 'NR==1')
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"
 
@@ -138,18 +137,20 @@ download_and_install_package() {
     print_message "Downloading $ipk_file package, please wait..."
     sleep 2
 
-    wget --no-check-certificate -qO "$temp_dir/$ipk_file" "$url"
+    # Download with explicit SSL bypass and timeout limits to prevent hanging
+    wget --no-check-certificate --timeout=15 -qO "$temp_dir/$ipk_file" "$url"
     dl_status=$?
 
-    if [ $dl_status -ne 0 ] || [ ! -f "$temp_dir/$ipk_file" ]; then
+    if [ $dl_status -ne 0 ] || [ ! -f "$temp_dir/$ipk_file" ] || [ ! -s "$temp_dir/$ipk_file" ]; then
         print_message "Package download failed from $url"
         sleep 3
         exit 1
     fi
 
+    print_message "Installing $ipk_file package, please wait..."
+
     if command -v opkg >/dev/null 2>&1; then
-        opkg update >/dev/null 2>&1
-        opkg install --force-reinstall "$temp_dir/$ipk_file"
+        opkg install --force-reinstall --force-overwrite "$temp_dir/$ipk_file"
         install_status=$?
     elif command -v dpkg >/dev/null 2>&1; then
         dpkg -i "$temp_dir/$ipk_file"
