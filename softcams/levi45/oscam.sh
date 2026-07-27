@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Configuration
-pack="enigma2-plugin-softcams-oscam-emu-levi45"
-version="11965-803_all"
+pack="enigma2-plugin-softcams-oscam-emu-pcsc-levi45"
+version="11966-803_all"
 package="$pack"
 
 #determine package manager
