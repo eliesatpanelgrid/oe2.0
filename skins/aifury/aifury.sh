@@ -22,10 +22,12 @@ if command -v dpkg &> /dev/null; then
 package_manager="apt"
 status_file="/var/lib/dpkg/status"
 uninstall_command="apt-get purge --auto-remove -y"
+install_command="apt-get install -y"
 else
 package_manager="opkg"
 status_file="/var/lib/opkg/status"
 uninstall_command="opkg remove --force-depends"
+install_command="opkg install --force-overwrite --force-reinstall"
 fi
 
 #check and_remove package old version
@@ -33,10 +35,10 @@ fi
 check_and_remove_package() {
 if [ -d $plugin_path ]; then
 echo "> removing package old version please wait..."
-sleep 3 
+sleep 3
 rm -rf $plugin_path > /dev/null 2>&1
-rm -rf /usr/lib/enigma2/python/Plugins/Extensions/Fury  > /dev/null 2>&1
-rm -rf /usr/share/enigma2/Fury-FHD  > /dev/null 2>&1
+rm -rf /usr/lib/enigma2/python/Plugins/Extensions/Fury > /dev/null 2>&1
+rm -rf /usr/share/enigma2/Fury-FHD > /dev/null 2>&1
 rm -r /usr/lib/enigma2/python/Components/fury* > /dev/null 2>&1
 rm -r /usr/lib/enigma2/python/Components/Converter/fury* > /dev/null 2>&1
 rm -r /usr/lib/enigma2/python/Components/Renderer/fury* > /dev/null 2>&1
@@ -54,7 +56,7 @@ sleep 3
 echo
 exit 1
 else
-echo " " 
+echo " "
 fi  }
 check_and_remove_package
 
@@ -99,11 +101,11 @@ echo "> Downloading $plugin-$version package  please wait ..."
 sleep 3
 
 if wget --show-progress -q "$BASE_URL/$PART2_FILE" -O "$TMP_DIR/$PART2_FILE" && [ -s "$TMP_DIR/$PART2_FILE" ]; then
-    if opkg install "$TMP_DIR/$PART2_FILE" --force-overwrite --force-reinstall >/dev/null 2>&1; then
+    if $install_command "$TMP_DIR/$PART2_FILE" >/dev/null 2>&1; then
         if wget --show-progress -q "$BASE_URL/aifury.ipk" -O "$TMP_DIR/aifury.ipk" && [ -s "$TMP_DIR/aifury.ipk" ]; then
-            if opkg install "$TMP_DIR/aifury.ipk" --force-overwrite --force-reinstall >/dev/null 2>&1; then
+            if $install_command "$TMP_DIR/aifury.ipk" >/dev/null 2>&1; then
                 rm -rf "$TMP_DIR"
-               echo "> $plugin-$version package installed successfully"
+                echo "> $plugin-$version package installed successfully"
                 echo "> Maintained By ElieSatpanelgrid team"
                 echo
                 sleep 3
