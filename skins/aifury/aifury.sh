@@ -1,5 +1,5 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/aifury/fury.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/aifury/aifury.sh
 
 # Configuration
 #########################################
