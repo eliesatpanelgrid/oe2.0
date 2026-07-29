@@ -9,7 +9,7 @@ plugin3="aifury"
 rm="Fury-FHD"
 section="skins"
 
-git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
+git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/aifury"
 version=$(wget $git_url/version -qO- | awk 'NR==1')
 plugin_path="/usr/share/enigma2/$rm"
 package="enigma2-plugin-extensions-$plugin"
