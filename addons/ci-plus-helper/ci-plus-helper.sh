@@ -56,7 +56,7 @@ check_and_remove_package() {
             $uninstall_command $package > /dev/null 2>&1
         fi
         echo "*******************************************"
-        echo "*       Removal Completed Successfully   *"
+        echo "*        Removal Completed Successfully   *"
         echo "*            Maintained by Eliesat        *"
         echo "*******************************************"
         sleep 3
@@ -77,7 +77,7 @@ print_message() {
 download_and_install_package() {
     print_message "> Downloading $plugin-$version package please wait ..."
     sleep 3
-    wget --show-progress -qO "$temp_dir/$targz_file" --no-check-certificate "$url"
+    wget --progress=bar:force -O "$temp_dir/$targz_file" --no-check-certificate "$url" 2>&1
     
     if [ -f "$temp_dir/$targz_file" ]; then
         tar -xzf "$temp_dir/$targz_file" -C / > /dev/null 2>&1
