@@ -4,7 +4,7 @@
 # Configuration
 #########################################
 plugin="hamzamovie"
-rm="HamzaMovie"
+rm="HamzaSummary"
 section="addons"
 
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
