@@ -77,7 +77,7 @@ print_message() {
 download_and_install_package() {
     print_message "> Downloading $plugin-$version package please wait ..."
     sleep 3
-    wget --progress=bar:force -O "$temp_dir/$targz_file" --no-check-certificate "$url" 2>&1
+    wget --progress=bar:force -qO "$temp_dir/$targz_file" --no-check-certificate "$url" 2>&1
     
     if [ -f "$temp_dir/$targz_file" ]; then
         tar -xzf "$temp_dir/$targz_file" -C / > /dev/null 2>&1
