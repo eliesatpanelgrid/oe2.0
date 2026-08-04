@@ -4,7 +4,7 @@
 # Configuration
 #########################################
 plugin="tmbd"
-rm="TMDb"
+rm="TMBD"
 section="addons"
 
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
