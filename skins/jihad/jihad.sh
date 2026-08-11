@@ -144,54 +144,50 @@ rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 if [ $extract -eq 0 ]; then
 
 set -e
-SKINDIR='/usr/share/enigma2/Jihad'
-WCDIR='/usr/share/enigma2/Jihad/main/windowcolor'
-TMPDIR='/tmp'
+
+SKINDIR="/usr/share/enigma2/Jihad"
+WCDIR="$SKINDIR/main/windowcolor"
+IMG_VER="/etc/image-version"
+ISSUE="/etc/issue"
 
 # Copy Default window color
-echo "Copying Default window color..."
-cp "$WCDIR/w_Default/"* "$SKINDIR/window/"
+cp "$WCDIR/w_Default/"* "$SKINDIR/window/" >/dev/null 2>&1 || true
 
-if grep -qs -i "openbh" /etc/image-version; then
-	mv $SKINDIR/image_logo/obh/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/obh/top_logo.png $SKINDIR
-	mv $SKINDIR/image_logo/skin_templates.xml $SKINDIR
-	
-elif grep -qs -i "openvix" /etc/image-version; then
-	mv $SKINDIR/image_logo/openvix/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/openvix/top_logo.png $SKINDIR
-	mv $SKINDIR/image_logo/skin_templates.xml $SKINDIR
-
-
-elif grep -qs -i "foxbob" /etc/issue; then
-	mv $SKINDIR/image_logo/openplifoxbob/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/openplifoxbob/top_logo.png $SKINDIR
-	mv $SKINDIR/image_logo/skin_templates.xml $SKINDIR
-	
-elif grep -qs -i "openATV" /etc/image-version; then
-    mv $SKINDIR/image_logo/openatv/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/openatv/top_logo.png $SKINDIR
-   
-elif grep -qs -i "egami" /etc/image-version; then
-	mv $SKINDIR/image_logo/egami/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/egami/top_logo.png $SKINDIR
-	
-elif grep -qs -i "PURE2" /etc/image-version; then
-	mv $SKINDIR/image_logo/pure2/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/pure2/top_logo.png $SKINDIR
-	
-elif grep -qs -i "OpenSPA" /etc/image-version; then
-    mv $SKINDIR/image_logo/openspa/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/openspa/top_logo.png $SKINDIR
-
-elif grep -qs -i "Hyperion" /etc/image-version; then
-	mv $SKINDIR/image_logo/pkt/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/pkt/top_logo.png $SKINDIR
-else	
-    echo
+# Identify image type and set key variable
+if grep -qsi "openbh" "$IMG_VER"; then
+    IMG="obh"
+elif grep -qsi "openvix" "$IMG_VER"; then
+    IMG="openvix"
+elif grep -qsi "foxbob" "$ISSUE"; then
+    IMG="openplifoxbob"
+elif grep -qsi "openATV" "$IMG_VER"; then
+    IMG="openatv"
+elif grep -qsi "egami" "$IMG_VER"; then
+    IMG="egami"
+elif grep -qsi "PURE2" "$IMG_VER"; then
+    IMG="pure2"
+elif grep -qsi "OpenSPA" "$IMG_VER"; then
+    IMG="openspa"
+elif grep -qsi "Hyperion" "$IMG_VER"; then
+    IMG="pkt"
+else
+    IMG=""
 fi
-rm -rf $SKINDIR/image_logo  > /dev/null 2>&1
-rm -rf /control  > /dev/null 2>&1
+
+# Apply image-specific assets
+if [ -n "$IMG" ] && [ -d "$SKINDIR/image_logo/$IMG" ]; then
+    mv "$SKINDIR/image_logo/$IMG/imagelogo.png" "$SKINDIR/" >/dev/null 2>&1 || true
+    mv "$SKINDIR/image_logo/$IMG/top_logo.png" "$SKINDIR/" >/dev/null 2>&1 || true
+fi
+
+# Move skin_templates.xml if present in image_logo
+if [ -f "$SKINDIR/image_logo/skin_templates.xml" ]; then
+    mv "$SKINDIR/image_logo/skin_templates.xml" "$SKINDIR/" >/dev/null 2>&1 || true
+fi
+
+# Cleanup
+rm -rf "$SKINDIR/image_logo" /control >/dev/null 2>&1 || true
+
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
