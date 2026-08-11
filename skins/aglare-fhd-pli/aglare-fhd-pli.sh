@@ -91,7 +91,7 @@ case "$PY" in
 esac
 
 # Required packages
-DEPS="enigma2-plugin-extensions-bitrate python3-pillow"
+DEPS="enigma2-plugin-extensions-bitrate python3-pillow gettext"
 
 # Check if installed
 is_installed() {
@@ -140,124 +140,68 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
-set -e  # Exit on first error
-SKINDIR='/usr/share/enigma2/Aglare-FHD-PLI'
-WCDIR='/usr/share/enigma2/Aglare-FHD-PLI/main/windowcolor'
-TMPDIR='/tmp'
+set -e
 
-echo "Supported Images are : "
-echo "1- OpenPLI develop , OpenPLI 9 , OpenPLI 10 , OpenPLI 10.1 , OpenPLI 11.0"
-echo "2- OBH 5.3 , 5.4 , 5.4.1 , 5.5.x , 5.6"
-echo "3- OpenVIX 6.4 , 6.5 , 6.6 , 6,7 , 6.8 , 6.9"
-echo "4- NonSoloSat"
-echo "5- OpenTR"
-echo "6- SatLodge"
-echo "7- CobraliberoSat"
-echo "8- TeamBlue 7.3 , 7.4 , 7.5"
-echo "9- OpenPLI foxbob python 3.13"
-echo "10- Corvoboys"
-echo "11- TNAP"
-sleep 2
+SKINDIR="/usr/share/enigma2/Aglare-FHD-PLI"
+WCDIR="$SKINDIR/main/windowcolor"
+IMG_VER="/etc/image-version"
+ISSUE="/etc/issue"
 
 # Copy Default window color
-echo "Copying Default window color..."
-cp "$WCDIR/w_Default/"* "$SKINDIR/window/"
+cp "$WCDIR/w_Default/"* "$SKINDIR/window/" >/dev/null 2>&1 || true
 
-echo "Identify your image ...."
-sleep 2
-if grep -qs -i "openbh" /etc/image-version; then
-    echo "You have Openbh image"
-	echo "Adjusting some files according to your image..."
-	mv $SKINDIR/image_logo/obh/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/obh/top_logo.png $SKINDIR
-	mv $SKINDIR/image_logo/skin_templates.xml $SKINDIR
-	
-elif grep -qs -i "openvix" /etc/image-version; then
-    echo "You have OpenVix image"
-	echo "Adjusting some files according to your image..."
-	mv $SKINDIR/image_logo/openvix/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/openvix/top_logo.png $SKINDIR
-	mv $SKINDIR/image_logo/skin_templates.xml $SKINDIR
-
-elif grep -qs -i "openpli" /etc/issue; then
-    if grep -qs -i "GCC-15" /etc/issue; then
-        echo "You have OpenPli GCC-15.1 image"
-        echo "Adjusting some files according to your image..."		
-        mv $SKINDIR/image_logo/openplifoxbob/imagelogo.png $SKINDIR
-        mv $SKINDIR/image_logo/openplifoxbob/top_logo.png $SKINDIR
-        mv $SKINDIR/image_logo/skin_templates.xml $SKINDIR
+# Identify image type and set key variable
+if grep -qsi "openbh" "$IMG_VER"; then
+    IMG="obh"
+elif grep -qsi "openvix" "$IMG_VER"; then
+    IMG="openvix"
+elif grep -qsi "openpli" "$ISSUE"; then
+    if grep -qsi "GCC-15" "$ISSUE"; then
+        IMG="openplifoxbob"
     else
-        echo "You have OpenPli image"
-        echo "Adjusting some files according to your image..."		
-        mv $SKINDIR/image_logo/openpli/imagelogo.png $SKINDIR
-        mv $SKINDIR/image_logo/openpli/top_logo.png $SKINDIR
+        IMG="openpli"
     fi
-
-elif grep -qs -i "foxbob" /etc/issue; then
-    echo "You have OpenPli foxbob image"
-	echo "Adjusting some files according to your image..."		
-	mv $SKINDIR/image_logo/openplifoxbob/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/openplifoxbob/top_logo.png $SKINDIR
-	mv $SKINDIR/image_logo/skin_templates.xml $SKINDIR
-	
-elif grep -qs -i "corvoboys" /etc/image-version; then
-    echo "You have CorvoBoys image"
-	echo "Adjusting some files according to your image..."
-	mv $SKINDIR/image_logo/corvoboys/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/corvoboys/top_logo.png $SKINDIR
-	mv $SKINDIR/image_logo/corvoboys/picon_default.png $SKINDIR
-	rm -rf $SKINDIR/spinner > /dev/null 2>&1
-	rm -rf $SKINDIR/picon_default.png  > /dev/null 2>&1
-	cp $SKINDIR/sf/little_logo.png $SKINDIR/picon_default.png
-	
-elif grep -qs -i "TNAP" /etc/issue; then
-    echo "You have TNAP image"
-	echo "Adjusting some files according to your image..."		
-	mv $SKINDIR/image_logo/tnap/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/tnap/top_logo.png $SKINDIR
-
-elif grep -qs -i "opentr" /etc/issue; then
-    echo "You have OpenTR image"
-	echo "Adjusting some files according to your image..."		
-	mv $SKINDIR/image_logo/opentr/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/opentr/top_logo.png $SKINDIR
-
-elif grep -qs -i "areadeltasat" /etc/issue; then
-    echo "You have areadeltasat image"
-	echo "Adjusting some files according to your image..."		
-	mv $SKINDIR/image_logo/openpli/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/openpli/top_logo.png $SKINDIR
-
-elif grep -qs -i "teamblue" /etc/issue; then
-    echo "You have TeamBlue image"
-	echo "Adjusting some files according to your image..."		
-	mv $SKINDIR/image_logo/teamblue/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/teamblue/top_logo.png $SKINDIR
-
-elif grep -qs -i "nonsolosat" /etc/issue; then
-    echo "You have NonSoloSat image"
-	echo "Adjusting some files according to your image..."		
-	mv $SKINDIR/image_logo/nss/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/nss/top_logo.png $SKINDIR
-	
-elif grep -qs -i "cobraliberosat" /etc/issue; then
-    echo "You have CobraliberoSat image"
-	echo "Adjusting some files according to your image..."		
-	mv $SKINDIR/image_logo/cobra/imagelogo.png $SKINDIR
-	cp /usr/share/enigma2/Aglare-FHD-PLI/main/top_logo.png $SKINDIR/top_logo.png
-	
-elif grep -qs -i "satlodge" /etc/issue; then
-    echo "You have SatLodge image"
-	echo "Adjusting some files according to your image..."		
-	mv $SKINDIR/image_logo/satlodge/imagelogo.png $SKINDIR
-	mv $SKINDIR/image_logo/satlodge/top_logo.png $SKINDIR
-	
-else	
-    echo "even you do not have supported image , you can try Aglare-FHD-PLI"
+elif grep -qsi "foxbob" "$ISSUE"; then
+    IMG="openplifoxbob"
+elif grep -qsi "corvoboys" "$IMG_VER"; then
+    IMG="corvoboys"
+elif grep -qsi "TNAP" "$ISSUE"; then
+    IMG="tnap"
+elif grep -qsi "opentr" "$ISSUE"; then
+    IMG="opentr"
+elif grep -qsi "areadeltasat" "$ISSUE"; then
+    IMG="openpli"
+elif grep -qsi "teamblue" "$ISSUE"; then
+    IMG="teamblue"
+elif grep -qsi "nonsolosat" "$ISSUE"; then
+    IMG="nss"
+elif grep -qsi "cobraliberosat" "$ISSUE"; then
+    IMG="cobra"
+elif grep -qsi "satlodge" "$ISSUE"; then
+    IMG="satlodge"
+else
+    IMG=""
 fi
-echo "removing some files.... "
-rm -rf $SKINDIR/image_logo  > /dev/null 2>&1
-rm -rf /control  > /dev/null 2>&1
+
+# Apply image-specific assets
+if [ "$IMG" = "corvoboys" ]; then
+    mv "$SKINDIR/image_logo/corvoboys/imagelogo.png" "$SKINDIR/" >/dev/null 2>&1 || true
+    mv "$SKINDIR/image_logo/corvoboys/top_logo.png" "$SKINDIR/" >/dev/null 2>&1 || true
+    mv "$SKINDIR/image_logo/corvoboys/picon_default.png" "$SKINDIR/" >/dev/null 2>&1 || true
+    rm -rf "$SKINDIR/spinner" "$SKINDIR/picon_default.png" >/dev/null 2>&1 || true
+    cp "$SKINDIR/sf/little_logo.png" "$SKINDIR/picon_default.png" >/dev/null 2>&1 || true
+
+elif [ "$IMG" = "cobra" ]; then
+    mv "$SKINDIR/image_logo/cobra/imagelogo.png" "$SKINDIR/" >/dev/null 2>&1 || true
+    cp "$SKINDIR/main/top_logo.png" "$SKINDIR/top_logo.png" >/dev/null 2>&1 || true
+
+elif [ -n "$IMG" ] && [ -d "$SKINDIR/image_logo/$IMG" ]; then
+    mv "$SKINDIR/image_logo/$IMG/imagelogo.png" "$SKINDIR/" >/dev/null 2>&1 || true
+    mv "$SKINDIR/image_logo/$IMG/top_logo.png" "$SKINDIR/" >/dev/null 2>&1 || true
+fi
+
+# Cleanup
+rm -rf "$SKINDIR/image_logo" /control >/dev/null 2>&1 || true
 
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
