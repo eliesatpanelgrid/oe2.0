@@ -246,13 +246,6 @@ if grep -q "^config.misc.initialchannelselection=True" "$SETTINGS" 2>/dev/null; 
     sed -i "s|^config.misc.initialchannelselection=True|config.misc.initialchannelselection=False|" "$SETTINGS" 2>/dev/null || true
 fi
 
-# Restart Enigma2 GUI
-if command -v killall >/dev/null 2>&1; then
-    killall -9 enigma2 2>/dev/null || true
-else
-    init 4 2>/dev/null && init 3 2>/dev/null || true
-fi
-
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
