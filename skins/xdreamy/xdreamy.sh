@@ -140,9 +140,7 @@ case "$PY" in
 esac
 
 # Required packages
-DEPS="python3-requests
-python3-pillow
-python3-image"
+DEPS="wget python3-sqlite3 python3-requests python3-pillow python3-pycairo"
 
 # Check if installed
 is_installed() {
@@ -177,6 +175,13 @@ done
 
 fi
 
+set -e
+
+# Remove previous installation if found
+if opkg list-installed 2>/dev/null | grep -q "^enigma2-plugin-skins-xDreamy -"; then
+    opkg remove enigma2-plugin-skins-xDreamy >/dev/null 2>&1 || true
+fi
+
 #download & install package
 #########################################
 print_message() {
@@ -192,59 +197,60 @@ rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
 
+set -e
+
 SKINDIR='/usr/share/enigma2/xDreamy'
 SETTINGS='/etc/enigma2/settings'
 
-# Silence all remaining output/errors from system subcommands
-exec 1>/dev/null 2>&1
-
-# ==================== Image & Python Detection ====================
+# Detect Image Type
 IMAGE="unknown"
-file_image_version=$(tr '[:upper:]' '[:lower:]' < /etc/image-version || true)
-file_issue=$(tr '[:upper:]' '[:lower:]' < /etc/issue || true)
+file_image_version=$(tr '[:upper:]' '[:lower:]' 2>/dev/null < /etc/image-version || true)
+file_issue=$(tr '[:upper:]' '[:lower:]' 2>/dev/null < /etc/issue || true)
 
 for key in openatv egami pure2 openspa opendroid openbh alliance openpli \
            openvix openhdf opentr foxbob nonsolosat satlodge gcc tnap \
            hyperion teamblue; do
-    if echo "$file_image_version$file_issue" | grep -q "$key"; then
+    if echo "$file_image_version$file_issue" | grep -q "$key" 2>/dev/null; then
         IMAGE="$key"
         break
     fi
 done
 
-if command -v python3 >/dev/null 2>&1; then
-    PYTHON_VERSION=$(python3 -c "import sys; print('%d.%d.%d' % sys.version_info[:3])" || true)
-fi
-
-# ==================== Apply Logo ====================
+# Apply Image Logo
 if [ -f "$SKINDIR/image_logo/$IMAGE/imagelogo.png" ]; then
-    cp "$SKINDIR/image_logo/$IMAGE/imagelogo.png" "$SKINDIR/imagelogo.png"
+    cp "$SKINDIR/image_logo/$IMAGE/imagelogo.png" "$SKINDIR/imagelogo.png" 2>/dev/null || true
 elif [ -f "/usr/share/enigma2/distro-logo.png" ]; then
-    cp "/usr/share/enigma2/distro-logo.png" "$SKINDIR/imagelogo.png"
+    cp "/usr/share/enigma2/distro-logo.png" "$SKINDIR/imagelogo.png" 2>/dev/null || true
 elif [ -f "$SKINDIR/image_logo/default/imagelogo.png" ]; then
-    cp "$SKINDIR/image_logo/default/imagelogo.png" "$SKINDIR/imagelogo.png"
+    cp "$SKINDIR/image_logo/default/imagelogo.png" "$SKINDIR/imagelogo.png" 2>/dev/null || true
 fi
 
-if [ -d "$SKINDIR/image_logo" ]; then
-    rm -rf "$SKINDIR/image_logo"
-fi
+# Cleanup Temporary Logo Assets
+rm -rf "$SKINDIR/image_logo" 2>/dev/null || true
 
-# ==================== Box Detection ====================
+# Apply Receiver Box Image
 BOX_MODEL=$(head -n 1 /etc/hostname 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)
-
 if [ -f "/usr/share/enigma2/$BOX_MODEL.png" ]; then
-    cp "/usr/share/enigma2/$BOX_MODEL.png" "$SKINDIR/boximage.png"
+    cp "/usr/share/enigma2/$BOX_MODEL.png" "$SKINDIR/boximage.png" 2>/dev/null || true
 fi
 
-# ==================== Apply XDREAMY Skin ====================
+# Apply XDREAMY Skin Settings
 if grep -q "^config.skin.primary_skin=" "$SETTINGS" 2>/dev/null; then
-    sed -i "s|^config.skin.primary_skin=.*|config.skin.primary_skin=xDreamy/skin.xml|" "$SETTINGS"
+    sed -i "s|^config.skin.primary_skin=.*|config.skin.primary_skin=xDreamy/skin.xml|" "$SETTINGS" 2>/dev/null || true
 else
-    echo "config.skin.primary_skin=xDreamy/skin.xml" >> "$SETTINGS"
+    echo "config.skin.primary_skin=xDreamy/skin.xml" >> "$SETTINGS" 2>/dev/null || true
 fi
 
+# Adjust OpenSPA Channel Selection Setting
 if grep -q "^config.misc.initialchannelselection=True" "$SETTINGS" 2>/dev/null; then
-    sed -i "s|^config.misc.initialchannelselection=True|config.misc.initialchannelselection=False|" "$SETTINGS"
+    sed -i "s|^config.misc.initialchannelselection=True|config.misc.initialchannelselection=False|" "$SETTINGS" 2>/dev/null || true
+fi
+
+# Restart Enigma2 GUI
+if command -v killall >/dev/null 2>&1; then
+    killall -9 enigma2 2>/dev/null || true
+else
+    init 4 2>/dev/null && init 3 2>/dev/null || true
 fi
 
   print_message "> $plugin-$version package installed successfully"
