@@ -92,14 +92,7 @@ case "$PY" in
 esac
 
 # Required packages
-DEPS="enigma2-plugin-extensions-bitrate
-enigma2-plugin-extensions-oaweather
-enigma2-plugin-extensions-weatherplugin
-enigma2-plugin-skincomponents-weathercomponent
-enigma2-plugin-systemplugins-weathercomponenthandler
-python3-beautifulsoup4
-python3-json
-python3-requests"
+DEPS="enigma2-plugin-extensions-bitrate enigma2-plugin-extensions-oaweather enigma2-plugin-extensions-weatherplugin enigma2-plugin-skincomponents-weathercomponent enigma2-plugin-systemplugins-weathercomponenthandler python3-beautifulsoup4 python3-json python3-requests gettext"
 
 # Check if installed
 is_installed() {
@@ -150,44 +143,40 @@ rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 if [ $extract -eq 0 ]; then
 set -e
 
-SKINDIR='/usr/share/enigma2/Aglare-FHD'
-WCDIR='/usr/share/enigma2/Aglare-FHD/main/windowcolor'
+SKINDIR="/usr/share/enigma2/Aglare-FHD"
+WCDIR="$SKINDIR/main/windowcolor"
+IMG_VER="/etc/image-version"
 
 # Copy Default window color
 cp "$WCDIR/w_Default/"* "$SKINDIR/window/" >/dev/null 2>&1 || true
 
-# Identify image and move corresponding logos
-if grep -qs -i "openATV" /etc/image-version; then
-    mv "$SKINDIR/image_logo/openatv/imagelogo.png" "$SKINDIR" >/dev/null 2>&1 || true
-    mv "$SKINDIR/image_logo/openatv/top_logo.png" "$SKINDIR" >/dev/null 2>&1 || true
+# Identify image type and set directory name
+if grep -qsi "openATV" "$IMG_VER"; then
+    IMG="openatv"
+elif grep -qsi "egami" "$IMG_VER"; then
+    IMG="egami"
+elif grep -qsi "PURE2" "$IMG_VER"; then
+    IMG="pure2"
+elif grep -qsi "OpenSPA" "$IMG_VER"; then
+    IMG="openspa"
+elif grep -qsi "Hyperion" "$IMG_VER"; then
+    IMG="pkt"
+elif grep -qsi "corvoboys" "$IMG_VER"; then
+    IMG="corvoboys"
+else
+    IMG=""
+fi
 
-elif grep -qs -i "egami" /etc/image-version; then
-    mv "$SKINDIR/image_logo/egami/imagelogo.png" "$SKINDIR" >/dev/null 2>&1 || true
-    mv "$SKINDIR/image_logo/egami/top_logo.png" "$SKINDIR" >/dev/null 2>&1 || true
-
-elif grep -qs -i "PURE2" /etc/image-version; then
-    mv "$SKINDIR/image_logo/pure2/imagelogo.png" "$SKINDIR" >/dev/null 2>&1 || true
-    mv "$SKINDIR/image_logo/pure2/top_logo.png" "$SKINDIR" >/dev/null 2>&1 || true
-
-elif grep -qs -i "OpenSPA" /etc/image-version; then
-    mv "$SKINDIR/image_logo/openspa/imagelogo.png" "$SKINDIR" >/dev/null 2>&1 || true
-    mv "$SKINDIR/image_logo/openspa/top_logo.png" "$SKINDIR" >/dev/null 2>&1 || true
-
-elif grep -qs -i "Hyperion" /etc/image-version; then
-    mv "$SKINDIR/image_logo/pkt/imagelogo.png" "$SKINDIR" >/dev/null 2>&1 || true
-    mv "$SKINDIR/image_logo/pkt/top_logo.png" "$SKINDIR" >/dev/null 2>&1 || true
-
-elif grep -qs -i "corvoboys" /etc/image-version; then
-    mv "$SKINDIR/image_logo/corvoboys/imagelogo.png" "$SKINDIR" >/dev/null 2>&1 || true
-    mv "$SKINDIR/image_logo/corvoboys/top_logo.png" "$SKINDIR" >/dev/null 2>&1 || true
-
+# Apply image logos or fallback
+if [ -n "$IMG" ] && [ -d "$SKINDIR/image_logo/$IMG" ]; then
+    mv "$SKINDIR/image_logo/$IMG/imagelogo.png" "$SKINDIR/" >/dev/null 2>&1 || true
+    mv "$SKINDIR/image_logo/$IMG/top_logo.png" "$SKINDIR/" >/dev/null 2>&1 || true
 else
     cp "$SKINDIR/main/top_logo.png" "$SKINDIR/top_logo.png" >/dev/null 2>&1 || true
 fi
 
-# Clean up directories
-rm -rf "$SKINDIR/image_logo" >/dev/null 2>&1
-rm -rf /control >/dev/null 2>&1
+# Cleanup
+rm -rf "$SKINDIR/image_logo" /control >/dev/null 2>&1 || true
 
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
