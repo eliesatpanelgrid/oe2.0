@@ -2,7 +2,7 @@
 
 # Configuration
 pack="enigma2-softcams-oscam-all-images"
-version="11958-emu-802-arm+mips_all"
+version="11966-emu-802-arm+mips_all"
 package="$pack"
 
 #determine package manager
