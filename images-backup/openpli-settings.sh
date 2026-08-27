@@ -1,5 +1,12 @@
 #!/bin/sh
 
+
+rm -rf /usr/lib/enigma2/python/Plugins/Extensions/BootLogoSwapper >/dev/null 2>&1
+
+wget -qO - https://gitlab.com/eliesat/display/-/raw/main/openpli-neutral/openpli.sh | sh
+wget -qO - https://gitlab.com/eliesat/softcams/-/raw/main/support/support-2-r0.2.sh | sh
+wget -qO - https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/images-backup/ipaudiopro.sh | sh
+
 # === Functions ===
 log() {
   printf "%s\n" "$*"
