@@ -3,7 +3,7 @@
 
 # Configuration
 #########################################
-plugin="xklass"
+plugin="xklassipaudio"
 rm="XKlass"
 section="addons"
 
