@@ -3,7 +3,7 @@
 
 # Configuration
 #########################################
-plugin="Apod"
+plugin="apod"
 rm="apod"
 section="addons"
 
