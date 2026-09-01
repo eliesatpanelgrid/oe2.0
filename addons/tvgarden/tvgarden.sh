@@ -51,6 +51,30 @@ echo " "
 fi  }
 check_and_remove_package
 
+if [ ! -f /usr/bin/enigma2 ]; then
+    exit 1
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+    exit 1
+fi
+
+if ! opkg list-installed | grep -q "gstreamer"; then
+    :
+fi
+
+TVGARDEN_DIR="/usr/lib/enigma2/python/Plugins/Extensions/TVGarden"
+if [ ! -d "$TVGARDEN_DIR" ]; then
+    mkdir -p "$TVGARDEN_DIR"
+fi
+
+CONFIG_DIR="/etc/enigma2/tvgarden"
+if [ -d "$CONFIG_DIR" ]; then
+    BACKUP_DIR="/tmp/tvgarden_backup_$(date +%Y%m%d_%H%M%S)"
+    cp -r "$CONFIG_DIR" "$BACKUP_DIR"
+fi
+
+
 #download & install dependencies
 #######################################
 # Detect OS
@@ -147,6 +171,58 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
+
+TVGARDEN_DIR="/usr/lib/enigma2/python/Plugins/Extensions/TVGarden"
+LOCALE_DIR="/usr/lib/enigma2/python/Plugins/Extensions/TVGarden/locale"
+ICONS_DIR="/usr/lib/enigma2/python/Plugins/Extensions/TVGarden/icons"
+CACHE_DIR="/tmp/tvgarden_cache"
+
+chmod -R 755 "$TVGARDEN_DIR"
+chown -R root:root "$TVGARDEN_DIR"
+
+if [ -d "$LOCALE_DIR" ]; then
+    for lang_dir in "$LOCALE_DIR"/*/; do
+        if [ -d "$lang_dir" ]; then
+            lang=$(basename "$lang_dir")
+            msgfmt -o "/usr/lib/enigma2/python/Plugins/Extensions/TVGarden/locale/$lang/LC_MESSAGES/tvgarden.mo" \
+                   "$LOCALE_DIR/$lang/LC_MESSAGES/tvgarden.po" 2>/dev/null || true
+        fi
+    done
+fi
+
+mkdir -p "$CACHE_DIR"
+mkdir -p "/etc/enigma2/tvgarden/favorites"
+chmod 777 "$CACHE_DIR"
+
+SKINS_DIR="/usr/share/enigma2"
+if [ -d "$TVGARDEN_DIR/skins" ]; then
+    for skin in "$TVGARDEN_DIR/skins"/*/; do
+        skin_name=$(basename "$skin")
+        ln -sf "$skin" "$SKINS_DIR/TVGarden_$skin_name" 2>/dev/null || true
+    done
+fi
+
+if [ -f /usr/lib/enigma2/python/Plugins/Extensions/TVGarden/plugin.py ]; then
+    python3 -c "
+import sys
+sys.path.insert(0, '/usr/lib/enigma2/python/Plugins')
+from Plugins.Plugin import PluginDescriptor
+import os
+plugin_path = '/usr/lib/enigma2/python/Plugins/Extensions/TVGarden'
+if os.path.exists(plugin_path):
+    pass
+" 2>/dev/null || true
+fi
+
+BACKUP_PATTERN="/tmp/tvgarden_backup_*"
+LATEST_BACKUP=$(ls -td $BACKUP_PATTERN 2>/dev/null | head -1)
+if [ -n "$LATEST_BACKUP" ] && [ -d "$LATEST_BACKUP" ]; then
+    cp -r "$LATEST_BACKUP"/* "/etc/enigma2/tvgarden/" 2>/dev/null || true
+    rm -rf "$LATEST_BACKUP"
+fi
+
+find "/tmp" -name "tvgarden_*" -type f -mtime +7 -delete 2>/dev/null || true
+
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
