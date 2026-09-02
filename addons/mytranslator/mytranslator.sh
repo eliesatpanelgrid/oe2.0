@@ -8,13 +8,55 @@ PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}
 
 case "$PY" in
     3.13|3.14)
-        plugin1="mytranslator_py$PY"
         ;;
     *)
         echo "> Python $PY is not supported"
         exit 1
         ;;
 esac
+
+#########################################
+# Detect Architecture
+#########################################
+ARCH=""
+UNAME_M=$(uname -m)
+
+case "$UNAME_M" in
+    aarch64|arm64)
+        ARCH="aarch64"
+        ;;
+    armv7l|armv6l|arm)
+        ARCH="arm"
+        ;;
+    mips|mipsel)
+        ARCH="mipsel"
+        ;;
+    *)
+        # Fallback detection using package manager architecture output
+        if command -v opkg >/dev/null 2>&1; then
+            OPKG_ARCHS=$(opkg print-architecture)
+            if echo "$OPKG_ARCHS" | grep -qi "aarch64"; then
+                ARCH="aarch64"
+            elif echo "$OPKG_ARCHS" | grep -qi "arm"; then
+                ARCH="arm"
+            elif echo "$OPKG_ARCHS" | grep -qi "mips"; then
+                ARCH="mipsel"
+            fi
+        elif command -v dpkg >/dev/null 2>&1; then
+            DPKG_ARCH=$(dpkg --print-architecture)
+            case "$DPKG_ARCH" in
+                arm64) ARCH="aarch64" ;;
+                armhf|armel) ARCH="arm" ;;
+                mipsel) ARCH="mipsel" ;;
+            esac
+        fi
+        ;;
+esac
+
+if [ -z "$ARCH" ]; then
+    echo "> Your architecture ($UNAME_M) is not supported."
+    exit 1
+fi
 
 #########################################
 # Configuration
@@ -30,18 +72,11 @@ version=$(wget -qO- "$git_url/version" | awk 'NR==1')
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"
 
+plugin1="${plugin}_${ARCH}_py${PY}"
 targz_file="$plugin1.tar.gz"
 url="$git_url/$targz_file"
 
 temp_dir="/tmp"
-
-#########################################
-# Detect ARM architecture
-#########################################
-if ! opkg print-architecture | grep -qi "arm"; then
-    echo "> Your device is not ARM and is not supported."
-    exit 1
-fi
 
 #########################################
 # Determine package manager
@@ -68,7 +103,7 @@ if [ -d "$plugin_path" ]; then
 
     rm -rf "$plugin_path" >/dev/null 2>&1
 
-    if grep -q "$package" "$status_file"; then
+    if grep -q "$package" "$status_file" 2>/dev/null; then
         echo "> Removing existing $package package, please wait..."
         $uninstall_command "$package" >/dev/null 2>&1
     fi
@@ -80,8 +115,6 @@ if [ -d "$plugin_path" ]; then
 
     sleep 3
     echo
-
-    exit 1
 
 else
     echo " "
@@ -107,7 +140,7 @@ fi
 #########################################
 # Required packages
 #########################################
-DEPS=""
+DEPS="python3-core"
 
 #########################################
 # Check installed package
@@ -125,42 +158,26 @@ is_installed() {
 #########################################
 # Install dependencies
 #########################################
-# Required packages
-DEPS="python3-core"
+if [ -n "$DEPS" ]; then
 
-# Check if installed
-is_installed() {
-    if [ "$OS" = "DreamOS" ]; then
-        dpkg -s "$1" >/dev/null 2>&1
-    else
-        opkg list-installed | grep -wq "$1"
-    fi
-}
+    echo "Updating package lists..."
+    $PM_UPDATE >/dev/null 2>&1
+    echo ""
 
-# Install deps
-if [ -z "$DEPS" ]; then
-    :
-else
-
-echo "Updating package lists..."
-$PM_UPDATE >/dev/null 2>&1
-echo ""
-
-for pkg in $DEPS; do
-    if is_installed "$pkg"; then
-        echo "[OK] $pkg already installed"
-    else
-        echo "[INSTALL] $pkg"
-        if $PM_INSTALL $pkg >/dev/null 2>&1; then
-            echo "[DONE] $pkg"
+    for pkg in $DEPS; do
+        if is_installed "$pkg"; then
+            echo "[OK] $pkg already installed"
         else
-            echo "[FAIL] $pkg"
+            echo "[INSTALL] $pkg"
+            if $PM_INSTALL $pkg >/dev/null 2>&1; then
+                echo "[DONE] $pkg"
+            else
+                echo "[FAIL] $pkg"
+            fi
         fi
-    fi
-done
+    done
 
 fi
-
 
 #########################################
 # Print messages
@@ -177,7 +194,7 @@ download_and_install_package() {
     print_message "Downloading $plugin-$version package please wait ..."
     sleep 3
 
-    wget --show-progress -qO $temp_dir/$targz_file --no-check-certificate $url
+    wget --show-progress -qO "$temp_dir/$targz_file" --no-check-certificate "$url"
 
     if [ $? -ne 0 ]; then
         print_message "$plugin-$version package download failed"
@@ -210,6 +227,7 @@ download_and_install_package() {
 
         print_message "$plugin-$version package download failed"
         sleep 3
+        exit 1
 
     fi
 
