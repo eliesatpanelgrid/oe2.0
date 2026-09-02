@@ -51,6 +51,154 @@ echo " "
 fi  }
 check_and_remove_package
 
+ERRORS=0
+WARNINGS=0
+
+# 1. Enigma2 presence
+ENIGMA2_DIR="/usr/lib/enigma2/python"
+if [ ! -d "$ENIGMA2_DIR" ]; then
+    ERRORS=$((ERRORS + 1))
+fi
+
+# 2. Image type detection
+IMAGE_NAME="Unknown"
+if [ -f /etc/image-version ]; then
+    IMAGE_NAME=$(head -1 /etc/image-version 2>/dev/null)
+elif [ -f /etc/issue ]; then
+    IMAGE_NAME=$(head -1 /etc/issue 2>/dev/null | sed 's/\\.*//g')
+fi
+
+# 3. Python version
+PY_BIN=""
+PY_VER=""
+if command -v python3 >/dev/null 2>&1; then
+    PY_BIN="python3"
+elif command -v python >/dev/null 2>&1; then
+    PY_BIN="python"
+fi
+
+if [ -n "$PY_BIN" ]; then
+    PY_MAJOR=$($PY_BIN -c 'import sys; print(sys.version_info[0])' 2>/dev/null)
+    if [ "$PY_MAJOR" = "3" ] || [ "$PY_MAJOR" = "2" ]; then
+        PY_VER=$($PY_BIN -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null)
+    else
+        WARNINGS=$((WARNINGS + 1))
+    fi
+else
+    ERRORS=$((ERRORS + 1))
+fi
+
+# 4. DVB tuner presence
+TUNER_FOUND=0
+if [ -d /dev/dvb ] && [ -n "$(ls -d /dev/dvb/adapter* 2>/dev/null)" ]; then
+    TUNER_FOUND=1
+elif [ -d /proc/stb/frontend ] && [ "$(ls -d /proc/stb/frontend/* 2>/dev/null | wc -l)" -gt 0 ]; then
+    TUNER_FOUND=1
+fi
+
+if [ $TUNER_FOUND -eq 0 ]; then
+    WARNINGS=$((WARNINGS + 1))
+fi
+
+# 5. Full HD skin verification
+FHD_OK=0
+SKIN_NAME="Unknown"
+SKIN_PATH=""
+SKIN_DIR=""
+
+SETTINGS="/etc/enigma2/settings"
+
+if [ -f "$SETTINGS" ]; then
+    SKIN_PATH=$(grep "^config.skin.primary_skin=" "$SETTINGS" 2>/dev/null | head -1 | cut -d= -f2- | tr -d ' \r')
+fi
+
+if [ -n "$SKIN_PATH" ]; then
+    SKIN_DIR=$(dirname "$SKIN_PATH")
+    SKIN_NAME=$(basename "$SKIN_DIR")
+    SKIN_LOWER=$(echo "$SKIN_NAME" | tr '[:upper:]' '[:lower:]')
+    
+    case "$SKIN_LOWER" in
+        *fhd*|*fullhd*|*full_hd*|*full-hd*|*1080*|*uhd*|*4k*|*2160*)
+            FHD_OK=1
+            ;;
+    esac
+
+    if [ $FHD_OK -eq 0 ] && [ -f "$SKIN_PATH" ]; then
+        MAX_WIDTH=$(grep -o 'size="[0-9]*[x,]' "$SKIN_PATH" 2>/dev/null | grep -o '[0-9]*' | sort -rn 2>/dev/null | head -1)
+        if [ -n "$MAX_WIDTH" ] && [ "$MAX_WIDTH" -ge 1920 ] 2>/dev/null; then
+            FHD_OK=1
+        fi
+    fi
+
+    if [ $FHD_OK -eq 0 ]; then
+        for SKIN_XML in "$SKIN_DIR/skin.xml" "$SKIN_DIR/skin_display.xml" "/usr/share/enigma2/$SKIN_NAME/skin.xml"; do
+            if [ -f "$SKIN_XML" ]; then
+                MAX_WIDTH=$(grep -o 'size="[0-9]*[x,]' "$SKIN_XML" 2>/dev/null | grep -o '[0-9]*' | sort -rn 2>/dev/null | head -1)
+                if [ -n "$MAX_WIDTH" ] && [ "$MAX_WIDTH" -ge 1920 ] 2>/dev/null; then
+                    FHD_OK=1
+                    break
+                fi
+            fi
+        done
+    fi
+fi
+
+if [ $FHD_OK -eq 0 ] && [ -f "$SETTINGS" ]; then
+    VID_MODE=$(grep "^config.av.videomode=" "$SETTINGS" 2>/dev/null | head -1 | cut -d= -f2- | tr -d ' \r')
+    case "$VID_MODE" in
+        *1080*|*2160*|*3840*|*1920*|*4k*|*4K*)
+            FHD_OK=1
+            ;;
+    esac
+fi
+
+if [ $FHD_OK -eq 0 ]; then
+    for PROC_VID in /proc/stb/video/videomode /proc/stb/video/current_resolution /proc/stb/video/resolution; do
+        if [ -f "$PROC_VID" ]; then
+            CUR_RES=$(cat "$PROC_VID" 2>/dev/null)
+            case "$(echo "$CUR_RES" | tr '[:upper:]' '[:lower:]')" in
+                *1080*|*2160*|*3840*|*1920*|*4k*)
+                    FHD_OK=1
+                    break
+                    ;;
+            esac
+        fi
+    done
+fi
+
+if [ $FHD_OK -eq 0 ] && [ -f "$SETTINGS" ]; then
+    if grep -q "config.av.1080p=1" "$SETTINGS" 2>/dev/null; then
+        FHD_OK=1
+    fi
+fi
+
+if [ $FHD_OK -eq 0 ]; then
+    ERRORS=$((ERRORS + 1))
+fi
+
+# Premium skin color check
+PREMIUM_OK=0
+if [ -n "$SKIN_DIR" ] && [ "$SKIN_DIR" != "." ]; then
+    for SKIN_XML in "$SKIN_PATH" "$SKIN_DIR/skin.xml" "/usr/share/enigma2/$SKIN_NAME/skin.xml"; do
+        if [ -f "$SKIN_XML" ]; then
+            for COLOR in chselfg background3 cyan1 hellgreen grdd7 grdd grdl foreground2; do
+                if grep -q "$COLOR" "$SKIN_XML" 2>/dev/null; then
+                    PREMIUM_OK=$((PREMIUM_OK + 1))
+                fi
+            done
+            break
+        fi
+    done
+fi
+
+if [ "$PREMIUM_OK" -lt 4 ]; then
+    WARNINGS=$((WARNINGS + 1))
+fi
+
+if [ $ERRORS -gt 0 ]; then
+    exit 1
+fi
+
 #download & install dependencies
 #######################################
 # Detect OS
@@ -132,6 +280,7 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
+
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
