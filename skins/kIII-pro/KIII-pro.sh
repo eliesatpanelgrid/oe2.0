@@ -1,15 +1,15 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/kIII-pro/KIII-pro.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/kIII-pro/KIII-pro.sh
 
 # Configuration
 #########################################
 plugin="KIII-pro"
 rm="KIII-pro"
-section="addons"
+section="skins"
 
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
 version=$(wget $git_url/version -qO- | awk 'NR==1')
-plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
+plugin_path="/usr/share/enigma2/$rm"
 package="enigma2-plugin-extensions-$plugin"
 targz_file="$plugin.tar.gz"
 url="$git_url/$targz_file"
