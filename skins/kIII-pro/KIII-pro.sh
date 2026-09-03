@@ -3,7 +3,7 @@
 
 # Configuration
 #########################################
-plugin="KIII-pro"
+plugin="kIII-pro"
 rm="KIII-pro"
 section="skins"
 
