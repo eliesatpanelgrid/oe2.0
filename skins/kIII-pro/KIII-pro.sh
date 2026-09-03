@@ -1,5 +1,4 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/kIII-pro/KIII-pro.sh
 
 # Configuration
 #########################################
@@ -7,8 +6,15 @@ plugin="kIII-pro"
 rm="KIII-pro"
 section="skins"
 
+# Fixed path formatting (Ensure exact case match on GitHub)
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
 version=$(wget $git_url/version -qO- | awk 'NR==1')
+
+# Fallback version if version file is missing on server
+if [ -z "$version" ]; then
+    version="1.0"
+fi
+
 plugin_path="/usr/share/enigma2/$rm"
 package="enigma2-plugin-extensions-$plugin"
 targz_file="$plugin.tar.gz"
@@ -18,42 +24,42 @@ temp_dir="/tmp"
 # Determine package manager
 #########################################
 if command -v dpkg &> /dev/null; then
-package_manager="apt"
-status_file="/var/lib/dpkg/status"
-uninstall_command="apt-get purge --auto-remove -y"
+    package_manager="apt"
+    status_file="/var/lib/dpkg/status"
+    uninstall_command="apt-get purge --auto-remove -y"
 else
-package_manager="opkg"
-status_file="/var/lib/opkg/status"
-uninstall_command="opkg remove --force-depends"
+    package_manager="opkg"
+    status_file="/var/lib/opkg/status"
+    uninstall_command="opkg remove --force-depends"
 fi
 
-#check and_remove package old version
+# Check and remove old version
 #########################################
 check_and_remove_package() {
-if [ -d $plugin_path ]; then
-echo "> removing package old version please wait..."
-sleep 3 
-rm -rf $plugin_path > /dev/null 2>&1
+    if [ -d "$plugin_path" ]; then
+        echo "> Removing old version, please wait..."
+        sleep 2
+        rm -rf "$plugin_path" > /dev/null 2>&1
 
-if grep -q "$package" "$status_file"; then
-echo "> Removing existing $package package, please wait..."
-$uninstall_command $package > /dev/null 2>&1
-fi
-echo "*******************************************"
-echo "*        Removal Completed Successfully   *"
-echo "*            Maintained by Eliesat        *"
-echo "*******************************************"
-sleep 3
-echo
-exit 1
-else
-echo " " 
-fi  }
+        if grep -q "$package" "$status_file"; then
+            echo "> Removing existing $package package, please wait..."
+            $uninstall_command $package > /dev/null 2>&1
+        fi
+        echo "*******************************************"
+        echo "*       Old Version Removed Successfully   *"
+        echo "*            Maintained by Eliesat         *"
+        echo "*******************************************"
+        sleep 2
+        echo
+        exit 1
+    else
+        echo "> No previous installation found. Proceeding..."
+    fi
+}
 check_and_remove_package
 
-#download & install dependencies
+# Download & install dependencies
 #######################################
-# Detect OS
 if command -v apt-get >/dev/null 2>&1; then
     OS="DreamOS"
     PM_UPDATE="apt-get update"
@@ -82,67 +88,40 @@ case "$PY" in
     *) echo "> Python $PY is not supported"; exit 1 ;;
 esac
 
-# Required packages
-DEPS=""
-
-# Check if installed
-is_installed() {
-    if [ "$OS" = "DreamOS" ]; then
-        dpkg -s "$1" >/dev/null 2>&1
-    else
-        opkg list-installed | grep -wq "$1"
-    fi
-}
-
-# Install deps
-if [ -z "$DEPS" ]; then
-    :
-else
-
-echo "Updating package lists..."
-$PM_UPDATE >/dev/null 2>&1
-echo ""
-
-for pkg in $DEPS; do
-    if is_installed "$pkg"; then
-        echo "[OK] $pkg already installed"
-    else
-        echo "[INSTALL] $pkg"
-        if $PM_INSTALL $pkg >/dev/null 2>&1; then
-            echo "[DONE] $pkg"
-        else
-            echo "[FAIL] $pkg"
-        fi
-    fi
-done
-
-fi
-
-#download & install package
+# Download & install package
 #########################################
 print_message() {
-echo "> [$(date +'%Y-%m-%d')] $1"
+    echo "> [$(date +'%Y-%m-%d')] $1"
 }
-download_and_install_package() {
-print_message "> Downloading $plugin-$version package  please wait ..."
-sleep 3
-wget --show-progress -qO $temp_dir/$targz_file --no-check-certificate $url
-tar -xzf $temp_dir/$targz_file -C / > /dev/null 2>&1
-extract=$?
-rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
-if [ $extract -eq 0 ]; then
-  print_message "> $plugin-$version package installed successfully"
-cleanup() {
-[ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
-rm -rf /control /postinst /preinst /prerm /postrm /tmp/*.ipk /tmp/*.tar.gz >/dev/null 2>&1
+download_and_install_package() {
+    print_message "Downloading $plugin-$version package, please wait..."
+    sleep 2
+    wget --show-progress -qO "$temp_dir/$targz_file" --no-check-certificate "$url"
+    
+    if [ ! -s "$temp_dir/$targz_file" ]; then
+        print_message "Error: Downloaded file is empty or missing at $url"
+        exit 1
+    fi
+
+    tar -xzf "$temp_dir/$targz_file" -C / > /dev/null 2>&1
+    extract=$?
+    rm -rf "$temp_dir/$targz_file" >/dev/null 2>&1
+
+    if [ $extract -eq 0 ]; then
+        print_message "$plugin-$version package installed successfully"
+        cleanup() {
+            [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
+            rm -rf /control /postinst /preinst /prerm /postrm /tmp/*.ipk /tmp/*.tar.gz >/dev/null 2>&1
+        }
+        cleanup
+        print_message "Maintained By ElieSatpanelgrid team"
+        echo
+        sleep 2
+    else
+        print_message "$plugin-$version package extraction failed"
+        sleep 2
+    fi
 }
-cleanup
-print_message "> Maintained By ElieSatpanelgrid team"
-echo
-sleep 3
-else
-  print_message "> $plugin-$version package download failed"
-  sleep 3
-fi  }
+
 download_and_install_package
