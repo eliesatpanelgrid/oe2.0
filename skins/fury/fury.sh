@@ -3,8 +3,8 @@
 
 # Configuration
 #########################################
-plugin="fury"
-rm="Fury"
+plugin="fury-fhd"
+rm="Fury-FHD"
 section="skins"
 
 git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$plugin"
