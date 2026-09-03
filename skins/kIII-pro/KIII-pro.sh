@@ -47,6 +47,7 @@ echo "*            Maintained by Eliesat        *"
 echo "*******************************************"
 sleep 3
 echo
+exit 1
 else
 echo " " 
 fi  }
