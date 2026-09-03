@@ -1,5 +1,5 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/KIII-pro/KIII-pro.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/kIII-pro/KIII-pro.sh
 
 # Configuration
 #########################################
