@@ -1,24 +1,19 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/KIII-pro/KIII-pro.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/kIII-pro/KIII-pro.sh
 
 # Configuration
 #########################################
-plugin="kIII-pro"
-rm="KIII-pro"
+plugin="KIII-pro"
+rm="KIII-PRO"
 section="skins"
 
-# Fixed repository directory case (KIII-pro vs kIII-pro)
-git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/$rm"
-version=$(wget $git_url/version -qO- | awk 'NR==1')
-
-# Fallback in case version file is unreadable
-if [ -z "$version" ]; then
-    version="1.0"
-fi
+git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/kIII-pro"
+version=$(wget -qO- "$git_url/version" 2>/dev/null | awk 'NR==1')
+[ -z "$version" ] && version="1.0"
 
 plugin_path="/usr/share/enigma2/$rm"
 package="enigma2-plugin-extensions-$plugin"
-targz_file="$rm.tar.gz"
+targz_file="$plugin.tar.gz"
 url="$git_url/$targz_file"
 temp_dir="/tmp"
 
@@ -52,7 +47,6 @@ echo "*            Maintained by Eliesat        *"
 echo "*******************************************"
 sleep 3
 echo
-exit 1
 else
 echo " " 
 fi  }
@@ -151,5 +145,6 @@ sleep 3
 else
   print_message "> $plugin-$version package download failed"
   sleep 3
+  exit 1
 fi  }
 download_and_install_package
