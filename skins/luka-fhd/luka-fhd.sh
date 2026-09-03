@@ -132,6 +132,40 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
+
+SKINDIR='/usr/share/enigma2/Luka-FHD'
+TMPDIR='/tmp'
+BOXMODEL=$(cat /etc/hostname)
+set -e
+cp $SKINDIR/lkimages_crimson_blue/2ndinfobar3.png $SKINDIR/lkimages/2ndinfobar3.png
+cp $SKINDIR/lkimages_crimson_blue/ch_bg.jpg $SKINDIR/lkimages/ch_bg.jpg
+cp $SKINDIR/lkimages_crimson_blue/infobar.png $SKINDIR/lkimages/infobar.png
+cp $SKINDIR/lkimages_crimson_blue/menu_bg.png $SKINDIR/lkimages/menu_bg.png
+
+if grep -qs -i "openATV" /etc/image-version; then
+    mv $SKINDIR/image_logo/openatv/imagelogo.png $SKINDIR
+   
+elif grep -qs -i "egami" /etc/image-version; then
+	mv $SKINDIR/image_logo/egami/imagelogo.png $SKINDIR
+	
+elif grep -qs -i "PURE2" /etc/image-version; then
+	mv $SKINDIR/image_logo/pure2/imagelogo.png $SKINDIR
+	
+elif grep -qs -i "OpenSPA" /etc/image-version; then
+    mv $SKINDIR/image_logo/openspa/imagelogo.png $SKINDIR
+
+elif grep -qs -i "Hyperion" /etc/image-version; then
+	mv $SKINDIR/image_logo/pkt/imagelogo.png $SKINDIR
+	
+else
+    :
+fi
+sleep 2
+rm -rf $SKINDIR/image_logo  > /dev/null 2>&1
+rm -rf /control  > /dev/null 2>&1
+sleep 2
+set +e
+
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
