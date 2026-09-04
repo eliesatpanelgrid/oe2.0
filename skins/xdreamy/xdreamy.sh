@@ -34,62 +34,43 @@ if [ -d $plugin_path ]; then
 echo "> removing package old version please wait..."
 sleep 3 
 rm -rf $plugin_path > /dev/null 2>&1
+files_to_remove='
+/usr/share/enigma2/xDreamy/
+/usr/lib/enigma2/python/Plugins/Extensions/xDreamy/
+/usr/lib/enigma2/python/Components/Converter/iAccess.py*
+/usr/lib/enigma2/python/Components/Converter/iBase.py*
+/usr/lib/enigma2/python/Components/Converter/iBoxInfo.py*
+/usr/lib/enigma2/python/Components/Converter/iEPGTranslate.py*
+/usr/lib/enigma2/python/Components/Converter/iEventList.py*
+/usr/lib/enigma2/python/Components/Converter/iEventName2.py*
+/usr/lib/enigma2/python/Components/Converter/iExtraNumText.py*
+/usr/lib/enigma2/python/Components/Converter/iFrontendInfo.py*
+/usr/lib/enigma2/python/Components/Converter/iMenuEntryCompare.py*
+/usr/lib/enigma2/python/Components/Converter/iNextEvents.py*
+/usr/lib/enigma2/python/Components/Converter/iServName2.py*
+/usr/lib/enigma2/python/Components/Converter/iServicePosition.py*
+/usr/lib/enigma2/python/Components/Converter/iVpn.py*
+/usr/lib/enigma2/python/Components/Renderer/iBackdropX.py*
+/usr/lib/enigma2/python/Components/Renderer/iChannelNumber.py*
+/usr/lib/enigma2/python/Components/Renderer/iConverlibr.py*
+/usr/lib/enigma2/python/Components/Renderer/iDebugger.py*
+/usr/lib/enigma2/python/Components/Renderer/iDownloadThread.py*
+/usr/lib/enigma2/python/Components/Renderer/iEventListDisplay.py*
+/usr/lib/enigma2/python/Components/Renderer/iInfoEvents.py*
+/usr/lib/enigma2/python/Components/Renderer/iNxtEvnt.py*
+/usr/lib/enigma2/python/Components/Renderer/iParental.py*
+/usr/lib/enigma2/python/Components/Renderer/iPosterX.py*
+/usr/lib/enigma2/python/Components/Renderer/iRendererBase.py*
+/usr/lib/enigma2/python/Components/Renderer/iRunningText.py*
+/usr/lib/enigma2/python/Components/Renderer/iStarX.py*
+/usr/lib/enigma2/python/Components/Renderer/iVolume2.py*
+/usr/lib/enigma2/python/Components/Renderer/iVolumeText.py*
+/usr/lib/enigma2/python/Components/Renderer/iVolz.py*
+/usr/lib/enigma2/python/Components/Renderer/iWatches.py*
+'
 
-files_to_remove=(
-   /usr/share/enigma2/xDreamy/
-   /usr/lib/enigma2/python/Plugins/Extensions/xDreamy/
-   /usr/lib/enigma2/python/Components/Converter/iAccess.py
-   /usr/lib/enigma2/python/Components/Converter/iBase.py
-   /usr/lib/enigma2/python/Components/Converter/iBitrate3.py
-   /usr/lib/enigma2/python/Components/Converter/iBoxInfo.py
-   /usr/lib/enigma2/python/Components/Converter/iCaidInfo2.py
-   /usr/lib/enigma2/python/Components/Converter/iCamdRAED.py
-   /usr/lib/enigma2/python/Components/Converter/iCpuUsage.py
-   /usr/lib/enigma2/python/Components/Converter/iCryptoInfo.py
-   /usr/lib/enigma2/python/Components/Converter/iEcmInfo.py
-   /usr/lib/enigma2/python/Components/Converter/iEventList.py
-   /usr/lib/enigma2/python/Components/Converter/iEventName2.py
-   /usr/lib/enigma2/python/Components/Converter/iExtra.py
-   /usr/lib/enigma2/python/Components/Converter/iExtraNumText.py
-   /usr/lib/enigma2/python/Components/Converter/iFrontendInfo.py
-   /usr/lib/enigma2/python/Components/Converter/iMenuDescription.py
-   /usr/lib/enigma2/python/Components/Converter/iMenuEntryCompare.py
-   /usr/lib/enigma2/python/Components/Converter/iNetSpeedInfo.py
-   /usr/lib/enigma2/python/Components/Converter/iNextEvents.py
-   /usr/lib/enigma2/python/Components/Converter/iReceiverInfo.py
-   /usr/lib/enigma2/python/Components/Converter/iRouteInfo.py
-   /usr/lib/enigma2/python/Components/Converter/iServName2.py
-   /usr/lib/enigma2/python/Components/Converter/iTemp.py
-   /usr/lib/enigma2/python/Components/Converter/iVpn.py
-   /usr/lib/enigma2/python/Components/Converter/iServiceInfoEX.py
-   /usr/lib/enigma2/python/Components/Converter/iExtraInfo.py
-   /usr/lib/enigma2/python/Components/Converter/iServicePosition.py
-   /usr/lib/enigma2/python/Components/Renderer/iBackdropX.py
-   /usr/lib/enigma2/python/Components/Renderer/iBackdropXDownloadThread.py
-   /usr/lib/enigma2/python/Components/Renderer/iChannelNumber.py
-   /usr/lib/enigma2/python/Components/Renderer/iEventListDisplay.py
-   /usr/lib/enigma2/python/Components/Renderer/iGenre.py
-   /usr/lib/enigma2/python/Components/Renderer/iInfoEvents.py
-   /usr/lib/enigma2/python/Components/Renderer/iNxtEvnt.py
-   /usr/lib/enigma2/python/Components/Renderer/iPosterX.py
-   /usr/lib/enigma2/python/Components/Renderer/iPosterXDownloadThread.py
-   /usr/lib/enigma2/python/Components/Renderer/iPosterXEMC.py
-   /usr/lib/enigma2/python/Components/Renderer/iRunningText.py
-   /usr/lib/enigma2/python/Components/Renderer/iStarX.py
-   /usr/lib/enigma2/python/Components/Renderer/iVolume2.py
-   /usr/lib/enigma2/python/Components/Renderer/iVolumeText.py
-   /usr/lib/enigma2/python/Components/Renderer/iVolz.py
-   /usr/lib/enigma2/python/Components/Renderer/iParental.py
-   /usr/lib/enigma2/python/Components/Renderer/iConverlibr.py
-)
-
-# Remove files and directories
-for file in "${files_to_remove[@]}"; do
-    if [ -e "$file" ]; then
-        rm -rf "$file"
-    else
-        echo "â?Œ File not found: $file"
-    fi
+for item in $files_to_remove; do
+    rm -rf $item 2>/dev/null
 done
 
 if grep -q "$package" "$status_file"; then
@@ -140,7 +121,10 @@ case "$PY" in
 esac
 
 # Required packages
-DEPS="wget python3-sqlite3 python3-requests python3-pillow python3-pycairo"
+DEPS="python3-sqlite3
+python3-requests
+python3-pillow
+python3-pycairo"
 
 # Check if installed
 is_installed() {
@@ -175,13 +159,6 @@ done
 
 fi
 
-set -e
-
-# Remove previous installation if found
-if opkg list-installed 2>/dev/null | grep -q "^enigma2-plugin-skins-xDreamy -"; then
-    opkg remove enigma2-plugin-skins-xDreamy >/dev/null 2>&1 || true
-fi
-
 #download & install package
 #########################################
 print_message() {
@@ -197,10 +174,7 @@ rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
 
-set -e
-
 SKINDIR='/usr/share/enigma2/xDreamy'
-SETTINGS='/etc/enigma2/settings'
 
 # Detect Image Type
 IMAGE="unknown"
@@ -216,34 +190,25 @@ for key in openatv egami pure2 openspa opendroid openbh alliance openpli \
     fi
 done
 
-# Apply Image Logo
+# Apply Logo
 if [ -f "$SKINDIR/image_logo/$IMAGE/imagelogo.png" ]; then
-    cp "$SKINDIR/image_logo/$IMAGE/imagelogo.png" "$SKINDIR/imagelogo.png" 2>/dev/null || true
+    cp "$SKINDIR/image_logo/$IMAGE/imagelogo.png" "$SKINDIR/imagelogo.png" 2>/dev/null
 elif [ -f "/usr/share/enigma2/distro-logo.png" ]; then
-    cp "/usr/share/enigma2/distro-logo.png" "$SKINDIR/imagelogo.png" 2>/dev/null || true
+    cp "/usr/share/enigma2/distro-logo.png" "$SKINDIR/imagelogo.png" 2>/dev/null
 elif [ -f "$SKINDIR/image_logo/default/imagelogo.png" ]; then
-    cp "$SKINDIR/image_logo/default/imagelogo.png" "$SKINDIR/imagelogo.png" 2>/dev/null || true
+    cp "$SKINDIR/image_logo/default/imagelogo.png" "$SKINDIR/imagelogo.png" 2>/dev/null
 fi
 
-# Cleanup Temporary Logo Assets
-rm -rf "$SKINDIR/image_logo" 2>/dev/null || true
+[ -d "$SKINDIR/image_logo" ] && rm -rf "$SKINDIR/image_logo" 2>/dev/null
 
-# Apply Receiver Box Image
+# Apply Receiver Image
 BOX_MODEL=$(head -n 1 /etc/hostname 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)
-if [ -f "/usr/share/enigma2/$BOX_MODEL.png" ]; then
-    cp "/usr/share/enigma2/$BOX_MODEL.png" "$SKINDIR/boximage.png" 2>/dev/null || true
-fi
-
-# Apply XDREAMY Skin Settings
-if grep -q "^config.skin.primary_skin=" "$SETTINGS" 2>/dev/null; then
-    sed -i "s|^config.skin.primary_skin=.*|config.skin.primary_skin=xDreamy/skin.xml|" "$SETTINGS" 2>/dev/null || true
-else
-    echo "config.skin.primary_skin=xDreamy/skin.xml" >> "$SETTINGS" 2>/dev/null || true
-fi
+[ -f "/usr/share/enigma2/$BOX_MODEL.png" ] && cp "/usr/share/enigma2/$BOX_MODEL.png" "$SKINDIR/boximage.png" 2>/dev/null
 
 # Adjust OpenSPA Channel Selection Setting
+SETTINGS='/etc/enigma2/settings'
 if grep -q "^config.misc.initialchannelselection=True" "$SETTINGS" 2>/dev/null; then
-    sed -i "s|^config.misc.initialchannelselection=True|config.misc.initialchannelselection=False|" "$SETTINGS" 2>/dev/null || true
+    sed -i "s|^config.misc.initialchannelselection=True|config.misc.initialchannelselection=False|" "$SETTINGS" 2>/dev/null
 fi
 
   print_message "> $plugin-$version package installed successfully"
