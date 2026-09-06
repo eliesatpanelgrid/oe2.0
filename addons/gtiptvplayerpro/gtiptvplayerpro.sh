@@ -118,7 +118,20 @@ esac
 
 # Required packages
 DEPS="enigma2
-python3-core"
+python3-core
+python3-compression
+python3-crypt
+python3-datetime
+python3-difflib
+python3-fcntl
+python3-html
+python3-io
+python3-json
+python3-math
+python3-netclient
+python3-stringold
+python3-threading
+python3-xml"
 
 # Check if installed
 is_installed() {
