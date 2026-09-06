@@ -180,194 +180,255 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
-
+# SPDX-FileCopyrightText: 2026 VicTuS59
+# SPDX-License-Identifier: GPL-2.0-or-later
 set -eu
-PLUGIN_DIR='/usr/lib/enigma2/python/Plugins/Extensions/GTIPTVPlayerPro'
-VARIANTS_DIR="$PLUGIN_DIR/_gt_variants"
-PYTHON=/usr/bin/python3
-VERSION='0.9.64'
-if [ ! -d "$PLUGIN_DIR" ] || [ -L "$PLUGIN_DIR" ]; then
-  exit 1
-fi
-if ! IDENTITY=$("$PYTHON" -c 'import importlib.util,sys;print("cp{}{}:{}".format(sys.version_info[0],sys.version_info[1],importlib.util.MAGIC_NUMBER.hex()))'); then
-  exit 1
-fi
-case "$IDENTITY" in
-  "cp39:610d0d0a") ABI="${IDENTITY%%:*}"; MAGIC="${IDENTITY#*:}" ;;
-  "cp310:6f0d0d0a") ABI="${IDENTITY%%:*}"; MAGIC="${IDENTITY#*:}" ;;
-  "cp311:a70d0d0a") ABI="${IDENTITY%%:*}"; MAGIC="${IDENTITY#*:}" ;;
-  "cp312:cb0d0d0a") ABI="${IDENTITY%%:*}"; MAGIC="${IDENTITY#*:}" ;;
-  "cp313:f30d0d0a") ABI="${IDENTITY%%:*}"; MAGIC="${IDENTITY#*:}" ;;
-  "cp314:2b0e0d0a") ABI="${IDENTITY%%:*}"; MAGIC="${IDENTITY#*:}" ;;
-  *)
-    exit 1
-    ;;
+
+TARGET_ROOT=${D:-${IPKG_INSTROOT:-}}
+case "$TARGET_ROOT" in
+    ""|/)
+        TARGET_ROOT=''
+        ;;
+    /*)
+        TARGET_ROOT=${TARGET_ROOT%/}
+        ;;
+    *)
+        echo 'GT IPTV Player Pro: invalid package root.' >&2
+        exit 1
+        ;;
 esac
-SELECTED="$VARIANTS_DIR/$ABI"
-"$PYTHON" - "$PLUGIN_DIR" "$SELECTED" "$ABI" "$MAGIC" "$VERSION" <<'PY'
-import hashlib
-import json
-import os
-import shutil
-import sys
-from pathlib import Path, PurePosixPath
 
+PLUGIN_DIR="$TARGET_ROOT/usr/lib/enigma2/python/Plugins/Extensions/GTIPTVPlayerPro"
+LEGACY_LANG_DIR="$PLUGIN_DIR/locale/languages"
+LEGACY_ALIASES="$PLUGIN_DIR/locale/aliases.json"
+SOURCE_TRANSLATION_TEMPLATE="$PLUGIN_DIR/locale/GTIPTVPlayerPro.pot"
+DATA_DIR="$TARGET_ROOT/etc/enigma2/gtiptvplayer"
+M3U_TEMPLATE_FILE="$DATA_DIR/IPTV_Liste.m3u"
+LEGACY_STALKER_FILE="$DATA_DIR/stalker_portal.txt"
+STALKER_FILE="$DATA_DIR/stalker.txt"
+WRONG_STALKER_DATA_DIR="$TARGET_ROOT/etc/enigma2/gtiptvplayerpro"
+WRONG_STALKER_FILE="$WRONG_STALKER_DATA_DIR/StalkerPortal.txt"
 
-def unique_object(pairs):
-    value = {}
-    for key, item in pairs:
-        if key in value:
-            raise RuntimeError("duplicate manifest field")
-        value[key] = item
-    return value
-
-
-def digest(path):
-    value = hashlib.sha256()
-    size = 0
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(65536), b""):
-            size += len(chunk)
-            value.update(chunk)
-    return size, value.hexdigest()
-
-
-root = Path(sys.argv[1])
-selected = Path(sys.argv[2])
-abi = sys.argv[3]
-magic = sys.argv[4]
-version = sys.argv[5]
-variants = root / "_gt_variants"
-stage = root / ".gt-installing"
-if root.is_symlink() or not root.is_dir():
-    raise RuntimeError("unsafe plugin root")
-if variants.is_symlink() or selected.is_symlink() or not selected.is_dir():
-    raise RuntimeError("unsafe bytecode variant")
-for path in variants.rglob("*"):
-    if path.is_symlink():
-        raise RuntimeError("variant contains symlink")
-manifest_path = selected / "release-manifest.json"
-manifest_payload = manifest_path.read_bytes()
-manifest = json.loads(
-    manifest_payload.decode("utf-8"), object_pairs_hook=unique_object
-)
-python_info = manifest.get("python") or {}
-if (
-    manifest.get("plugin") != "GTIPTVPlayerPro"
-    or manifest.get("version") != version
-    or manifest.get("protected") is not True
-    or manifest.get("source_included") is not False
-    or manifest.get("device_lab_bridge_included") is not False
-    or python_info.get("abi") != abi
-    or python_info.get("magic_hex") != magic
-    or python_info.get("optimization") != 2
-):
-    raise RuntimeError("selected manifest identity does not match")
-entries = manifest.get("files")
-if not isinstance(entries, list) or not entries:
-    raise RuntimeError("selected manifest file list is missing")
-expected = {}
-for entry in entries:
-    if not isinstance(entry, dict) or set(entry) != {"path", "sha256", "size"}:
-        raise RuntimeError("selected manifest entry is invalid")
-    name = entry.get("path")
-    relative = PurePosixPath(name) if isinstance(name, str) else PurePosixPath("/")
-    if (
-        not name
-        or relative.is_absolute()
-        or relative.as_posix() != name
-        or any(part in ("", ".", "..") for part in relative.parts)
-        or name in expected
-        or name == "release-manifest.json"
-        or name.lower().endswith((".py", ".pyo"))
-        or "lab_bridge" in name.lower()
-    ):
-        raise RuntimeError("selected manifest path is unsafe")
-    expected[name] = entry
-variant_names = {
-    path.relative_to(selected).as_posix()
-    for path in selected.rglob("*")
-    if path.is_file()
+data_directory_owner_is_current_user() {
+    DATA_DIRECTORY_OWNER=$(stat -c '%u' "$DATA_DIR" 2>/dev/null) || return 1
+    INSTALLER_OWNER=$(id -u 2>/dev/null) || return 1
+    [ "$DATA_DIRECTORY_OWNER" = "$INSTALLER_OWNER" ]
 }
-expected_bytecode = {name for name in expected if name.lower().endswith(".pyc")}
-if variant_names != expected_bytecode | {"release-manifest.json"}:
-    raise RuntimeError("selected bytecode file list does not match")
-for name, entry in expected.items():
-    path = selected / name if name in expected_bytecode else root / name
-    if path.is_symlink() or not path.is_file():
-        raise RuntimeError("protected payload is missing: " + name)
-    size, sha256 = digest(path)
-    if size != entry.get("size") or sha256 != entry.get("sha256"):
-        raise RuntimeError("protected payload hash does not match: " + name)
-    if name in expected_bytecode and path.read_bytes()[:4].hex() != magic:
-        raise RuntimeError("protected bytecode magic does not match: " + name)
-if stage.exists():
-    if stage.is_symlink() or not stage.is_dir():
-        raise RuntimeError("unsafe temporary install path")
-    shutil.rmtree(str(stage))
-stage.mkdir(mode=0o700)
-try:
-    for name in sorted(expected_bytecode):
-        source = selected / name
-        target = stage / name
-        target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-        shutil.copyfile(str(source), str(target))
-    for current, directories, files in os.walk(str(root), topdown=True):
-        current_path = Path(current)
-        kept = []
-        for directory in directories:
-            child = current_path / directory
-            if child in (variants, stage):
-                continue
-            if child.is_symlink():
-                raise RuntimeError("installed plugin contains symlink")
-            kept.append(directory)
-        directories[:] = kept
-        for filename in files:
-            path = current_path / filename
-            relative = path.relative_to(root).as_posix()
-            lowered = relative.lower()
-            if path.is_symlink():
-                raise RuntimeError("installed plugin contains symlink")
+
+data_directory_mode_is_private() {
+    DATA_DIRECTORY_MODE=$(stat -c '%a' "$DATA_DIR" 2>/dev/null) || return 1
+    [ "$DATA_DIRECTORY_MODE" = '700' ]
+}
+
+# This directory contains user-managed source definitions and may include
+# authenticated stream URLs.  Never follow a replacement symlink during a
+# package upgrade.  Optional data migration failures must not leave opkg with
+# an unpacked-but-unconfigured package.
+DATA_SETUP_OK=1
+if [ -L "$DATA_DIR" ]; then
+    echo 'GT IPTV Player Pro: data directory is a symlink; data migration skipped.' >&2
+    DATA_SETUP_OK=0
+elif [ -e "$DATA_DIR" ] && [ ! -d "$DATA_DIR" ]; then
+    echo 'GT IPTV Player Pro: data path is not a directory; data migration skipped.' >&2
+    DATA_SETUP_OK=0
+elif [ ! -d "$DATA_DIR" ]; then
+    if ! (
+        umask 077
+        mkdir -p "$DATA_DIR"
+        data_directory_owner_is_current_user || exit 1
+        chmod 700 "$DATA_DIR" || exit 1
+        data_directory_mode_is_private
+    ); then
+        echo 'GT IPTV Player Pro: data directory could not be created; data migration skipped.' >&2
+        DATA_SETUP_OK=0
+    fi
+else
+    if ! data_directory_owner_is_current_user; then
+        echo 'GT IPTV Player Pro: data directory has an unexpected owner; data migration skipped.' >&2
+        DATA_SETUP_OK=0
+    elif ! chmod 700 "$DATA_DIR" || ! data_directory_mode_is_private; then
+        echo 'GT IPTV Player Pro: data directory permissions could not be secured; data migration skipped.' >&2
+        DATA_SETUP_OK=0
+    fi
+fi
+
+# Stalker/MAC sources use the same persistent data directory as playlists.
+# A short-lived R29 build used /etc/enigma2/gtiptvplayerpro/StalkerPortal.txt;
+# copy that file (or the older stalker_portal.txt spelling) only when the
+# canonical stalker.txt file is absent, then remove the obsolete path safely.
+if [ "$DATA_SETUP_OK" -eq 1 ] && [ -L "$STALKER_FILE" ]; then
+    echo 'GT IPTV Player Pro: Stalker account path is a symlink; creation skipped.' >&2
+elif [ "$DATA_SETUP_OK" -eq 1 ] && [ -e "$STALKER_FILE" ] && [ ! -f "$STALKER_FILE" ]; then
+    echo 'GT IPTV Player Pro: Stalker account path is not a file; creation skipped.' >&2
+elif [ "$DATA_SETUP_OK" -eq 1 ] && [ -f "$STALKER_FILE" ]; then
+    chmod 600 "$STALKER_FILE" || true
+elif [ "$DATA_SETUP_OK" -eq 1 ]; then
+    STALKER_TMP="$DATA_DIR/.stalker.txt.tmp.$$"
+    if [ -e "$STALKER_TMP" ] || [ -L "$STALKER_TMP" ]; then
+        echo 'GT IPTV Player Pro: temporary Stalker path is unsafe; creation skipped.' >&2
+    else
+        trap 'rm -f "$STALKER_TMP"' 0 1 2 15
+        STALKER_MIGRATION_SOURCE=''
+        STALKER_TMP_READY=0
+        if [ ! -L "$WRONG_STALKER_DATA_DIR" ] && \
+           [ -d "$WRONG_STALKER_DATA_DIR" ] && \
+           [ -f "$WRONG_STALKER_FILE" ] && \
+           [ ! -L "$WRONG_STALKER_FILE" ]; then
+            STALKER_MIGRATION_SOURCE=$WRONG_STALKER_FILE
+        elif [ -f "$LEGACY_STALKER_FILE" ] && [ ! -L "$LEGACY_STALKER_FILE" ]; then
+            STALKER_MIGRATION_SOURCE=$LEGACY_STALKER_FILE
+        fi
+        if [ -n "$STALKER_MIGRATION_SOURCE" ]; then
             if (
-                lowered.endswith((".py", ".pyo", ".pyc"))
-                or "lab_bridge" in lowered
-                or relative == "release-manifest.json"
-            ):
-                path.unlink()
-    for name in sorted(expected_bytecode):
-        source = stage / name
-        target = root / name
-        target.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
-        os.replace(str(source), str(target))
-    manifest_temporary = stage / "release-manifest.json"
-    manifest_temporary.write_bytes(manifest_payload)
-    os.replace(str(manifest_temporary), str(root / "release-manifest.json"))
-    allowed = set(expected) | {"release-manifest.json"}
-    for current, directories, files in os.walk(str(root), topdown=True):
-        current_path = Path(current)
-        directories[:] = [
-            item
-            for item in directories
-            if current_path / item not in (variants, stage)
-        ]
-        for filename in files:
-            path = current_path / filename
-            relative = path.relative_to(root).as_posix()
-            if relative not in allowed:
-                path.unlink()
-    for name, entry in expected.items():
-        path = root / name
-        size, sha256 = digest(path)
-        if size != entry.get("size") or sha256 != entry.get("sha256"):
-            raise RuntimeError("installed payload verification failed: " + name)
-finally:
-    if stage.exists() and not stage.is_symlink():
-        shutil.rmtree(str(stage))
-if variants.exists():
-    shutil.rmtree(str(variants))
-PY
-sync
+                umask 077
+                set -C
+                cat "$STALKER_MIGRATION_SOURCE" > "$STALKER_TMP" || exit 1
+                chmod 600 "$STALKER_TMP" || exit 1
+            ); then
+                STALKER_TMP_READY=1
+            else
+                echo 'GT IPTV Player Pro: obsolete Stalker data could not be migrated.' >&2
+            fi
+        else
+            if (
+                umask 077
+                set -C
+                cat > "$STALKER_TMP" <<'EOF'
+# GT IPTV Player Pro - Stalker / MAC Portal
+# Add a portal URL, then place one or more MAC addresses below it.
+# Start another block with the next portal URL.
+#
+# http://example.invalid/c/
+# 00:1A:79:XX:XX:01
+EOF
+                chmod 600 "$STALKER_TMP" || exit 1
+            ); then
+                STALKER_TMP_READY=1
+            else
+                echo 'GT IPTV Player Pro: Stalker account file could not be prepared.' >&2
+            fi
+        fi
+        if [ "$STALKER_TMP_READY" -eq 1 ] && [ -f "$STALKER_TMP" ]; then
+            if ! ln "$STALKER_TMP" "$STALKER_FILE" 2>/dev/null; then
+                if [ -L "$STALKER_FILE" ] || [ ! -f "$STALKER_FILE" ]; then
+                    echo 'GT IPTV Player Pro: Stalker account file could not be installed safely.' >&2
+                fi
+            else
+                chmod 600 "$STALKER_FILE" || true
+            fi
+        fi
+        rm -f "$STALKER_TMP" || true
+        trap - 0 1 2 15
+    fi
+fi
+
+remove_matching_stalker_file() {
+    LEGACY_FILE=$1
+    if [ -L "$LEGACY_FILE" ]; then
+        echo 'GT IPTV Player Pro: obsolete Stalker path is a symlink; left unchanged.' >&2
+    elif [ -f "$LEGACY_FILE" ]; then
+        if cmp -s "$STALKER_FILE" "$LEGACY_FILE" 2>/dev/null; then
+            rm -f "$LEGACY_FILE" || true
+        else
+            echo 'GT IPTV Player Pro: obsolete Stalker file contains different data; left unchanged.' >&2
+        fi
+    elif [ -e "$LEGACY_FILE" ]; then
+        echo 'GT IPTV Player Pro: obsolete Stalker path is not a file; left unchanged.' >&2
+    fi
+}
+
+if [ "$DATA_SETUP_OK" -eq 1 ] && [ -f "$STALKER_FILE" ] && [ ! -L "$STALKER_FILE" ]; then
+    remove_matching_stalker_file "$LEGACY_STALKER_FILE"
+    if [ -L "$WRONG_STALKER_DATA_DIR" ]; then
+        echo 'GT IPTV Player Pro: obsolete Stalker directory is a symlink; left unchanged.' >&2
+    elif [ -d "$WRONG_STALKER_DATA_DIR" ]; then
+        remove_matching_stalker_file "$WRONG_STALKER_FILE"
+        rmdir "$WRONG_STALKER_DATA_DIR" 2>/dev/null || true
+    elif [ -e "$WRONG_STALKER_DATA_DIR" ]; then
+        echo 'GT IPTV Player Pro: obsolete Stalker directory is not a directory; left unchanged.' >&2
+    fi
+fi
+
+# Create a private, parse-safe starter playlist only when no file exists.
+# Disabled examples begin with an extra '#', so they never appear as broken
+# channels.  A hard-link commit makes the create operation atomic and keeps a
+# concurrently created user file intact.
+if [ "$DATA_SETUP_OK" -eq 1 ] && [ -L "$M3U_TEMPLATE_FILE" ]; then
+    echo 'GT IPTV Player Pro: M3U template path is a symlink; template creation skipped.' >&2
+elif [ "$DATA_SETUP_OK" -eq 1 ] && [ -e "$M3U_TEMPLATE_FILE" ] && [ ! -f "$M3U_TEMPLATE_FILE" ]; then
+    echo 'GT IPTV Player Pro: M3U template path is not a file; template creation skipped.' >&2
+elif [ "$DATA_SETUP_OK" -eq 1 ] && [ ! -e "$M3U_TEMPLATE_FILE" ]; then
+    M3U_TEMPLATE_TMP="$DATA_DIR/.IPTV_Liste.m3u.tmp.$$"
+    if [ -e "$M3U_TEMPLATE_TMP" ] || [ -L "$M3U_TEMPLATE_TMP" ]; then
+        echo 'GT IPTV Player Pro: temporary M3U template path is unsafe; template creation skipped.' >&2
+    else
+        trap 'rm -f "$M3U_TEMPLATE_TMP"' 0 1 2 15
+        if (
+            umask 077
+            set -C
+            cat > "$M3U_TEMPLATE_TMP" <<'EOF'
+#EXTM3U
+# GT IPTV Player Pro - M3U playlist template
+#
+# Each channel consists of two lines:
+# 1. Channel information beginning with #EXTINF
+# 2. Direct stream URL
+#
+# The examples below are disabled.
+# Replace the sample values, then remove one leading # from both lines.
+#
+##EXTINF:-1 tvg-id="example.news" tvg-name="Example News" tvg-logo="https://example.invalid/logos/news.png" group-title="News",Example News
+#https://example.invalid/live/news/index.m3u8
+#
+##EXTINF:-1 tvg-id="example.sport" tvg-name="Example Sport" tvg-logo="https://example.invalid/logos/sport.png" group-title="Sport",Example Sport
+#https://example.invalid/live/sport/live.ts
+EOF
+            chmod 600 "$M3U_TEMPLATE_TMP"
+        ); then
+            if ! ln "$M3U_TEMPLATE_TMP" "$M3U_TEMPLATE_FILE" 2>/dev/null; then
+                if [ -L "$M3U_TEMPLATE_FILE" ] || [ ! -f "$M3U_TEMPLATE_FILE" ]; then
+                    echo 'GT IPTV Player Pro: could not install the M3U template safely; creation skipped.' >&2
+                fi
+            fi
+        else
+            echo 'GT IPTV Player Pro: could not create the M3U template; creation skipped.' >&2
+        fi
+        rm -f "$M3U_TEMPLATE_TMP" || true
+        trap - 0 1 2 15
+    fi
+fi
+
+# Versions before 1.0.0-r2 used a private JSON translation runtime.  Package
+# upgrades do not always remove files that came from a manual installation,
+# so remove only those exact obsolete paths after the new gettext files have
+# been unpacked successfully.
+if [ -L "$LEGACY_LANG_DIR" ]; then
+    rm -f "$LEGACY_LANG_DIR"
+elif [ -d "$LEGACY_LANG_DIR" ]; then
+    rm -rf "$LEGACY_LANG_DIR"
+fi
+
+if [ -e "$LEGACY_ALIASES" ] || [ -L "$LEGACY_ALIASES" ]; then
+    rm -f "$LEGACY_ALIASES"
+fi
+
+# The POT template belongs in the source repository, not on the receiver.
+if [ -e "$SOURCE_TRANSLATION_TEMPLATE" ] || [ -L "$SOURCE_TRANSLATION_TEMPLATE" ]; then
+    rm -f "$SOURCE_TRANSLATION_TEMPLATE"
+fi
+
+for OBSOLETE_FILE in \
+    "$PLUGIN_DIR/README.md" \
+    "$PLUGIN_DIR/CHANGELOG.md" \
+    "$PLUGIN_DIR/TRANSLATIONS.md" \
+    "$PLUGIN_DIR/skin/images/player-placeholder-v095.png" \
+    "$PLUGIN_DIR/locale/en/LC_MESSAGES/GTIPTVPlayerPro.mo" \
+    "$PLUGIN_DIR/locale/en_GB/LC_MESSAGES/GTIPTVPlayerPro.mo"
+do
+    if [ -e "$OBSOLETE_FILE" ] || [ -L "$OBSOLETE_FILE" ]; then
+        rm -f "$OBSOLETE_FILE"
+    fi
+done
 
   print_message "> $plugin-$version package installed successfully"
 cleanup() {
