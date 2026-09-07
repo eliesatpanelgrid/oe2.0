@@ -250,6 +250,8 @@ rm -f "$PLUG"/receivercompat.pyc "$PLUG"/receivercompat.pyo \
       "$PLUG"/startmenu.pyc "$PLUG"/startmenu.pyo \
       "$PLUG"/audioquickreturn.pyc "$PLUG"/audioquickreturn.pyo \
       "$PLUG"/ipaudioexport.pyc "$PLUG"/ipaudioexport.pyo \
+      "$PLUG"/streammonitor.pyc "$PLUG"/streammonitor.pyo \
+      "$PLUG"/streammetrics.pyc "$PLUG"/streammetrics.pyo \
       "$PLUG"/audiofeeds.pyc "$PLUG"/audiofeeds.pyo \
       "$PLUG"/remote_backup.pyc "$PLUG"/remote_backup.pyo \
       "$PLUG"/telegrambackup.py "$PLUG"/telegrambackup.pyc \
