@@ -237,52 +237,6 @@ download_and_install_package() {
             cp -f "$SKINDIR/main/boximage.png" "$SKINDIR/boximage.png" 2>/dev/null
         fi
 
-        if [ ! -f /usr/bin/bitrate ] && [ ! -d /usr/lib/enigma2/python/Plugins/Extensions/Bitrate ] && [ ! -d /usr/lib/enigma2/python/Plugins/Extensions/BitrateViewer ]; then
-            cat << 'EOF' > /tmp/install_bitrate.sh
-#!/bin/sh
-sleep 8
-opkg update >/dev/null 2>&1
-opkg install bitrate >/dev/null 2>&1
-if [ ! -d /usr/lib/enigma2/python/Plugins/Extensions/Bitrate ] && [ ! -f /usr/bin/bitrate ]; then
-    opkg install enigma2-plugin-extensions-bitrate >/dev/null 2>&1
-fi
-if [ ! -d /usr/lib/enigma2/python/Plugins/Extensions/Bitrate ] && [ ! -f /usr/bin/bitrate ]; then
-    opkg install enigma2-plugin-extensions-bitrateviewer >/dev/null 2>&1
-fi
-rm -f /tmp/install_bitrate.sh
-EOF
-            chmod 755 /tmp/install_bitrate.sh
-            /tmp/install_bitrate.sh &
-        fi
-
-        SYS_ARCH=$(uname -m)
-        if [ "$SYS_ARCH" = "aarch64" ]; then
-            BASE_ARCH="aarch64"
-        elif echo "$SYS_ARCH" | grep -q "mips"; then
-            BASE_ARCH="mipsel"
-        else
-            BASE_ARCH="arm"
-        fi
-
-        cat << EOF > /tmp/install_aifury.sh
-#!/bin/sh
-sleep 10
-curl -s -k -L "https://raw.githubusercontent.com/islam-2412/IPKS/main/fury/AIFury/aifury_py${PYVER}_${BASE_ARCH}.ipk" -o /tmp/aifury.ipk
-if [ -f /tmp/aifury.ipk ] && [ \$(wc -c < /tmp/aifury.ipk) -gt 1000 ]; then
-    if ! grep -q 'Not Found' /tmp/aifury.ipk; then
-        opkg install --force-reinstall --force-overwrite /tmp/aifury.ipk >/dev/null 2>&1
-    fi
-fi
-rm -f /tmp/aifury.ipk
-rm -f /tmp/install_aifury.sh
-EOF
-
-        chmod 755 /tmp/install_aifury.sh
-        /tmp/install_aifury.sh &
-
-        rm -rf "$SKINDIR/image_logo" > /dev/null 2>&1
-        rm -rf /control > /dev/null 2>&1
-
         print_message "$plugin-$version package installed successfully"
         cleanup() {
             [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
