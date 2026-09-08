@@ -51,6 +51,7 @@ check_and_remove_package() {
         echo "*            Maintained by Eliesat        *"
         echo "*******************************************"
         sleep 3
+        exit 1
         echo
     fi
 }
