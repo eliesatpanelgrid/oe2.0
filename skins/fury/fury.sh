@@ -37,6 +37,7 @@ check_and_remove_package() {
         sleep 3 
         rm -rf "$plugin_path" > /dev/null 2>&1
         rm -rf /usr/lib/enigma2/python/Plugins/Extensions/Fury > /dev/null 2>&1
+        rm -rf /usr/lib/enigma2/python/Plugins/Extensions/AIFury > /dev/null 2>&1
         rm -rf /usr/share/enigma2/Fury-FHD > /dev/null 2>&1
         rm -rf /usr/lib/enigma2/python/Components/fury* > /dev/null 2>&1
         rm -rf /usr/lib/enigma2/python/Components/Converter/fury* > /dev/null 2>&1
@@ -89,7 +90,7 @@ case "$PY" in
 esac
 
 # Required packages
-DEPS="enigma2-plugin-extensions-bitrate python3-pillow"
+DEPS="enigma2-plugin-extensions-bitrate enigma2-plugin-extensions-bitrateviewer python3-pillow"
 
 # Check if installed
 is_installed() {
@@ -236,6 +237,34 @@ download_and_install_package() {
         if [ "$BOX_IMAGE_FOUND" = false ]; then
             cp -f "$SKINDIR/main/boximage.png" "$SKINDIR/boximage.png" 2>/dev/null
         fi
+
+        SYS_ARCH=$(uname -m)
+        if [ "$SYS_ARCH" = "aarch64" ]; then
+            BASE_ARCH="aarch64"
+        elif echo "$SYS_ARCH" | grep -q "mips"; then
+            BASE_ARCH="mipsel"
+        else
+            BASE_ARCH="arm"
+        fi
+
+        cat << EOF > /tmp/install_aifury.sh
+
+sleep 1
+curl -s -k -L "https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/skins/fury/aifury_py${PYVER}_${BASE_ARCH}.ipk" -o /tmp/aifury.ipk
+if [ -f /tmp/aifury.ipk ] && [ \$(wc -c < /tmp/aifury.ipk) -gt 1000 ]; then
+    if ! grep -q 'Not Found' /tmp/aifury.ipk; then
+        opkg install --force-reinstall --force-overwrite /tmp/aifury.ipk >/dev/null 2>&1
+    fi
+fi
+rm -f /tmp/aifury.ipk
+rm -f /tmp/install_aifury.sh
+EOF
+
+        chmod 755 /tmp/install_aifury.sh
+        /tmp/install_aifury.sh &
+
+        rm -rf "$SKINDIR/image_logo" > /dev/null 2>&1
+        rm -rf /control > /dev/null 2>&1
 
         print_message "$plugin-$version package installed successfully"
         cleanup() {
