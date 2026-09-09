@@ -4,6 +4,7 @@ cat << 'EOF' > /tmp/get_vuplus.sh
 # Configuration
 #########################################
 hostname=$(head -n 1 /etc/hostname)
+echo $hostname
 image='vuplus-image'
 
 # Map hostname to code.vuplus.de folder string
@@ -43,6 +44,7 @@ imgnm=$(curl -sL "$target_dir_url" | grep -o 'vuplus-image-[^"]*_usb\.zip' | sor
 
 if [ -z "$imgnm" ]; then
     echo "> Error: Could not find image for device $hostname on code.vuplus.de."
+    rm -f "$0"
     exit 1
 fi
 
@@ -64,6 +66,7 @@ done
 
 if [ -z "$ms" ]; then
     echo "> Mount your external memory and try again"
+    rm -f "$0"
     exit 1
 fi
 
@@ -78,6 +81,7 @@ if [ $? -eq 0 ] && [ -s "$ms/images/$imgnm" ]; then
     echo "> Download finished: $ms/images/$imgnm"
 else
     echo "> Download failed!"
+    rm -f "$0"
     exit 1
 fi
 
@@ -92,6 +96,9 @@ do
 done
 
 echo "> Eliesat enjoy..."
+
+# Clean up script itself
+rm -f "$0"
 EOF
 chmod +x /tmp/get_vuplus.sh
 /tmp/get_vuplus.sh
