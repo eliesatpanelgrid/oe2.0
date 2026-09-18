@@ -83,9 +83,8 @@ fi
 
 # Print the detected Python version
 echo "> Detected Python version: $PY"
-
 case "$PY" in
-    2.7|3.7|3.8|3.9|3.10|3.11|3.12|3.13|3.14) ;;
+    2.*|3.*) ;;
     *) echo "> Python $PY is not supported"; exit 1 ;;
 esac
 
