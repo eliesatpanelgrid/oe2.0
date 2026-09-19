@@ -40,8 +40,8 @@ echo "> Removing existing $package package, please wait..."
 $uninstall_command $package > /dev/null 2>&1
 fi
 echo "*******************************************"
-echo "*        Removal Completed Successfully   *"
-echo "*            Maintained by Eliesat        *"
+echo "*         Removal Completed Successfully    *"
+echo "*             Maintained by Eliesat         *"
 echo "*******************************************"
 sleep 3
 echo
@@ -130,7 +130,7 @@ print_message() {
 echo "> [$(date +'%Y-%m-%d')] $1"
 }
 download_and_install_package() {
-print_message "> Downloading $plugin-$version package  please wait ..."
+print_message "Downloading $plugin-$version package  please wait ..."
 sleep 3
 wget --show-progress -qO $temp_dir/$targz_file --no-check-certificate $url
 tar -xzf $temp_dir/$targz_file -C / > /dev/null 2>&1
@@ -138,17 +138,18 @@ extract=$?
 rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
-  print_message "> $plugin-$version package installed successfully"
+  print_message "$plugin-$version package installed successfully"
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
 rm -rf /control /postinst /preinst /prerm /postrm /tmp/*.ipk /tmp/*.tar.gz >/dev/null 2>&1
 }
 cleanup
-print_message "> Maintained By ElieSatpanelgrid team"
+print_message "Maintained By ElieSatpanelgrid team"
 echo
 sleep 3
 else
-  print_message "> $plugin-$version package download failed"
+  print_message "$plugin-$version package download failed"
   sleep 3
+  exit 1
 fi  }
 download_and_install_package
