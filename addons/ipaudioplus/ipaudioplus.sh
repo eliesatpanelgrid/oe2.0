@@ -3,7 +3,7 @@
 
 # Configuration
 #########################################
-plugin="XXXXXX"
+plugin="ipaudioplus"
 rm="IPAudioPlus"
 section="addons"
 
