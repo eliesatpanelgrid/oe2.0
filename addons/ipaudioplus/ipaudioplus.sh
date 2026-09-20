@@ -1,5 +1,5 @@
 #!/bin/sh
-#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/XXXXXX/XXXXXX.sh
+#https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/addons/ipaudioplus/ipaudioplus.sh
 
 # Configuration
 #########################################
