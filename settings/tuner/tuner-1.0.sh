@@ -7,16 +7,16 @@ echo "> Downloading diseqc 1.0 tuner config file ..."
 wget -qO /tmp/$tuner "https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/settings/tuner/$tuner"
 
 echo "> Installing diseqc 1.0 tuner settings ..."
-
 echo
-    echo "> $tuner is installed successfully"
-    echo "> Maintained By ElieSatpanelgrid team"
-    echo
-    sleep 2
+echo "> $tuner is installed successfully"
+echo "> Maintained By ElieSatpanelgrid team"
+echo
+sleep 2
 
 # Check if running under systemd (DreamOS / Debian / OE-Alliance with systemd)
 if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
-    systemctl stop enigma2
+    systemctl stop enigma2.service
+    killall -9 enigma2
     sleep 2
     
     # Modify settings safely while Enigma2 is offline
@@ -30,7 +30,7 @@ if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     echo
     sleep 2
     
-    systemctl start enigma2
+    systemctl start enigma2.service
 else
     # Stop Enigma2 safely without overwriting settings
     init 4
