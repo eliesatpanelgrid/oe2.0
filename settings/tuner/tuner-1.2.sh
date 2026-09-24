@@ -14,9 +14,6 @@ sleep 2
 
 # Check if systemd is available (DreamOS / Debian)
 if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
-    # DreamOS / Systemd handling
-    systemctl stop enigma2.service
-    killall -9 enigma2
     sleep 1
     
     sed -i '/config.Nims.0/d' /etc/enigma2/settings
@@ -29,7 +26,7 @@ if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     echo
     sleep 2
     
-    systemctl start enigma2.service
+    systemctl restart enigma2
 else
     # Standard Enigma2 (OpenATV / OpenPLi / etc.)
     # 1. Stop Enigma2 clean to prevent overwrite
