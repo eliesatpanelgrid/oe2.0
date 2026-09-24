@@ -1,52 +1,42 @@
 #!/bin/sh
 
-tuner=tuner-1.2
+tuner="tuner-1.2"
+tmp_file="/tmp/$tuner"
+settings_file="/etc/enigma2/settings"
 
 echo "> Downloading diseqc 1.2 tuner config file ..."
-wget -qO /tmp/$tuner "https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/settings/tuner/$tuner"
+wget -qO "$tmp_file" "https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/settings/tuner/$tuner"
+
+if [ ! -s "$tmp_file" ]; then
+    echo "> Error: Failed to download tuner config file."
+    exit 1
+fi
+
+echo "> Stopping Enigma2 to apply changes..."
+# Gracefully stop Enigma2 across both systemd (DreamOS/Gemini) and SysVinit
+if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+    systemctl stop enigma2
+else
+    init 4
+fi
+sleep 3
 
 echo "> Installing diseqc 1.2 tuner settings ..."
-echo
-echo "> $tuner is installed successfully"
-echo "> Maintained By ElieSatpanelgrid team"
-echo
-sleep 2
+# Modify settings while Enigma2 is completely stopped
+sed -i '/config.Nims.0/d' "$settings_file"
+grep "config.Nims.*" "$tmp_file" >> "$settings_file"
+rm -f "$tmp_file" >/dev/null 2>&1
 
-# Check if systemd is available (DreamOS / Debian)
+echo "> Starting Enigma2..."
 if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
-    sleep 1
-    
-    sed -i '/config.Nims.0/d' /etc/enigma2/settings
-    grep "config.Nims.*" /tmp/$tuner >> /etc/enigma2/settings
-    rm -f /tmp/$tuner >/dev/null 2>&1
-    
-    echo
-    echo "> $tuner is installed successfully"
-    echo "> Maintained By ElieSatpanelgrid team"
-    echo
-    sleep 2
-    
-    systemctl restart enigma2
+    systemctl start enigma2
 else
-    # Standard Enigma2 (OpenATV / OpenPLi / etc.)
-    # 1. Stop Enigma2 clean to prevent overwrite
-    init 4
-    sleep 2
-    
-    # 2. Modify settings while stopped
-    sed -i '/config.Nims.0/d' /etc/enigma2/settings
-    grep "config.Nims.*" /tmp/$tuner >> /etc/enigma2/settings
-    rm -f /tmp/$tuner >/dev/null 2>&1
-    
-    # 3. Print messages while GUI is down
-    echo
-    echo "> $tuner is installed successfully"
-    echo "> Maintained By ElieSatpanelgrid team"
-    echo
-    sleep 2
-    
-    # 4. Restart Enigma2
     init 3
 fi
+
+echo
+echo "> $tuner installed successfully"
+echo "> Maintained By ElieSatpanelgrid team"
+echo
 
 exit 0
