@@ -14,7 +14,6 @@ if [ ! -s "$tmp_file" ]; then
 fi
 
 echo "> Stopping Enigma2 to apply changes..."
-# Gracefully stop Enigma2
 if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     systemctl stop enigma2.service
 else
@@ -29,21 +28,18 @@ sed -i '/config.Nims.0/d' "$settings_file"
 grep "config.Nims.*" "$tmp_file" >> "$settings_file"
 rm -f "$tmp_file" >/dev/null 2>&1
 
+echo
+echo "> $tuner installed successfully"
+echo "> Maintained By ElieSatpanelgrid team"
+echo
+
 echo "> Starting Enigma2..."
+sleep 2
+
 if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     systemctl reset-failed enigma2.service >/dev/null 2>&1
-echo
-echo "> $tuner installed successfully"
-echo "> Maintained By ElieSatpanelgrid team"
-echo
-sleep 2
     systemctl start enigma2.service
 else
-echo
-echo "> $tuner installed successfully"
-echo "> Maintained By ElieSatpanelgrid team"
-echo
-sleep 2
     init 3
 fi
 
