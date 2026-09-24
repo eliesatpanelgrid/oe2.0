@@ -32,15 +32,19 @@ rm -f "$tmp_file" >/dev/null 2>&1
 echo "> Starting Enigma2..."
 if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
     systemctl reset-failed enigma2.service >/dev/null 2>&1
-    systemctl start enigma2.service
-else
-    init 3
-fi
-
 echo
 echo "> $tuner installed successfully"
 echo "> Maintained By ElieSatpanelgrid team"
 echo
 sleep 2
+    systemctl start enigma2.service
+else
+echo
+echo "> $tuner installed successfully"
+echo "> Maintained By ElieSatpanelgrid team"
+echo
+sleep 2
+    init 3
+fi
 
 exit 0
