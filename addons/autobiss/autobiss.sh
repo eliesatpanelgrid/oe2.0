@@ -133,6 +133,17 @@ rm -rf $temp_dir/$targz_file >/dev/null 2>&1
 
 if [ $extract -eq 0 ]; then
   print_message "> $plugin-$version package installed successfully"
+
+for f in /usr/lib/enigma2/python/Plugins/Extensions/AutoBiss/bin/tsdec-*; do
+    if [ -f "$f" ]; then
+        chmod 755 "$f" 2>/dev/null
+    fi
+done
+chmod 644 /usr/lib/enigma2/python/Plugins/Extensions/AutoBiss/*.py 2>/dev/null
+chmod 755 /usr/lib/enigma2/python/Plugins/Extensions/AutoBiss/__init__.py 2>/dev/null
+rm -rf /usr/lib/enigma2/python/Plugins/Extensions/AutoBiss/__pycache__ 2>/dev/null
+rm -rf /tmp/enigma2_plugins.xml 2>/dev/null
+
 cleanup() {
 [ -d "/CONTROL" ] && rm -rf /CONTROL >/dev/null 2>&1
 rm -rf /control /postinst /preinst /prerm /postrm /tmp/*.ipk /tmp/*.tar.gz >/dev/null 2>&1
