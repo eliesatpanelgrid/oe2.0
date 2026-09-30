@@ -11,8 +11,6 @@ git_url="https://raw.githubusercontent.com/eliesatpanelgrid/oe2.0/main/$section/
 version=$(wget $git_url/version -qO- | awk 'NR==1')
 plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/$rm"
 package="enigma2-plugin-extensions-$plugin"
-targz_file="$plugin.tar.gz"
-url="$git_url/$targz_file"
 temp_dir="/tmp"
 
 # Determine package manager
@@ -41,7 +39,7 @@ $uninstall_command $package > /dev/null 2>&1
 fi
 echo "*******************************************"
 echo "*        Removal Completed Successfully   *"
-echo "*            Maintained by Eliesat        *"
+echo "*            Maintained by Eliesat         *"
 echo "*******************************************"
 sleep 3
 echo
@@ -78,9 +76,13 @@ esac
 PY=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")' 2>/dev/null)
 
 case "$PY" in
-    3.9|3.10|3.11|3.12|3.13|3.14) ;;
+    3.13|3.14) ;;
     *) echo "> Python $PY is not supported"; exit 1 ;;
 esac
+
+# Set dynamic tar file name and URL based on detected Python version
+targz_file="${plugin}_py${PY}.tar.gz"
+url="$git_url/$targz_file"
 
 # Required packages
 DEPS=""
