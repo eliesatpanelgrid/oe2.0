@@ -46,7 +46,7 @@ check_and_remove_package() {
         echo "*******************************************"
         sleep 3
         echo
-        # Note: 'exit 1' removed here so script can continue to installation
+        exit 1
     else
         echo " " 
     fi
